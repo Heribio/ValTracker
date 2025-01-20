@@ -1,0 +1,4 @@
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
+github.com/yldshv/go-valorant-api v1.0.7 h1:sQOWXUHh/i9x1n9BLPcD0tXZisaUiJ+ZKuLcdt52bMo=
+github.com/yldshv/go-valorant-api v1.0.7/go.mod h1:+67Mk5RZOCtiWqMKg06fqOGUHjYzpM5q6TjUSK1Qew0=
