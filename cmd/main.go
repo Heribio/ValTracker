@@ -1,13 +1,9 @@
 package main
 
 import(
-	"github.com/Heribio/ValTracker/internal/valorantapi"
+	"github.com/Heribio/ValTracker/internal/cli"
 )
 
 func main() {
-	vapi := valorantapi.Authorization()
-
-	puuid := valorantapi.GetAccountPUUID("Name", "Tag", vapi)	
-	valorantapi.GetAccountMatches(puuid, vapi)
-	valorantapi.GetAccountMMR(puuid, vapi)
+	cli.UserInput()
 }
