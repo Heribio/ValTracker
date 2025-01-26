@@ -1,7 +1,7 @@
 package cli
 
 import(
-	"log"
+    "log"
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -27,9 +27,9 @@ const (
 )
 
 type model struct {
-	inputs []textinput.Model
-	focused   int
-	err       error
+    inputs []textinput.Model
+    focused   int
+    err       error
 }
 
 func initialModel() model {
@@ -116,7 +116,7 @@ func (m *model) prevInput() {
 }
 
 func valapi(name string, tag string) {
-	vapi := valorantapi.Authorization()
+    vapi := valorantapi.Authorization()
 
 	puuid := valorantapi.GetAccountPUUID(name, tag, vapi)	
 	valorantapi.GetAccountMatches(puuid, vapi)
