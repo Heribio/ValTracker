@@ -35,6 +35,8 @@ type model struct {
     accountPages []page
     switched     bool
     state        state
+    name         string
+    tag          string
 }
 
 func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
@@ -46,7 +48,8 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
             matchListPage,
         },
         state: state{
-            loginPage: InitialModel(), // Initialize login state properly!
+            loginPage: InitialModel(),
+            matchListPage: MatchList(),
         },
     }
     return result, nil
@@ -68,10 +71,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         switch msg.String() {
         case "ctrl+c":
             return m, tea.Quit
-        case "esc":
-            return m, tea.Quit
         }
     }
+
     var cmd tea.Cmd
     switch m.page{
     case loginPage:
@@ -81,7 +83,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             m = newModel
         }
     case matchListPage:
-        m.state.matchListPage = MatchList()
         var updatedModel tea.Model
         updatedModel, cmd = m.matchListUpdate(msg)
         if newModel, ok := updatedModel.(model); ok {
@@ -92,6 +93,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     if m.switched {
 		m.switched = false
 	}
+
     var headerCmd tea.Cmd
 
     cmds := []tea.Cmd{headerCmd}

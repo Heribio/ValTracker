@@ -11,21 +11,12 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type matchListState struct {
     list list.Model
 }
 
 type Match valorantapi.Match
-
-func (m matchListState) Init() tea.Cmd {
-    return nil
-}
-
-func (m model) matchListView() string {
-    return docStyle.Render(m.state.matchListPage.list.View())
-}
 
 func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -39,16 +30,25 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
        }
     }
 
-	m.state.matchListPage.list, _= m.state.matchListPage.list.Update(msg)
-	return m, nil
+    var cmd tea.Cmd
+	m.state.matchListPage.list, cmd= m.state.matchListPage.list.Update(msg)
+	return m, cmd
 }
 
+//Settings for margin of list
+var docStyle = lipgloss.NewStyle().Margin(2, 3)
+
+func (m model) matchListView() string {
+    return docStyle.Render(m.state.matchListPage.list.View())
+}
+
+//Display of informations in list items
 func (m Match) Title() string {
-    return fmt.Sprintf("%s - %s", m.MapName, m.Mode)
+    return fmt.Sprintf("%s - %s", m.MapName, m.CharacterName)
 }
 
 func (m Match) Description() string {
-    return fmt.Sprintf("Character: %s | Kills: %d | Deaths: %d", m.CharacterName, m.Kills, m.Deaths)
+    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d", m.Kills, m.Deaths, m.Assists)
 }
 func (i Match) FilterValue() string { return i.Id}
 
@@ -59,21 +59,24 @@ func getMatch(match valorantapi.Match) Match {
         Mode: match.Mode,
         Kills: match.Kills,
         Deaths: match.Deaths,
+        Assists: match.Assists,
         CharacterName: match.CharacterName,
     }
     return i
 }
 
+//Get matches
 func MatchList() matchListState {
-    puuid := valorantapi.GetAccountPUUID("Heri", "BLUB")
+    //TODO Get name and tag from loginui
+    puuid := valorantapi.GetAccountPUUID("Name", "Tag")
     resp := valorantapi.GetAccountMatches(puuid)
     formattedMatches := valorantapi.FormatMatches(resp)
 
     items := make([]list.Item, len(formattedMatches))
-    for i := 0; i < len(formattedMatches); i++ { // Iterate safely
+    for i := range len(formattedMatches){
         items[i] = getMatch(formattedMatches[i])
     }
 
-    m := matchListState{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
+    m := matchListState{list: list.New(items, list.NewDefaultDelegate(), 50, 40)}
     return m
 }

@@ -45,10 +45,6 @@ func InitialModel() loginState {
 	}
 }
 
- func (m loginState) Init() tea.Cmd {
- 	return textinput.Blink
- }
-
 func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
     var cmds []tea.Cmd = make([]tea.Cmd, len(m.state.loginPage.inputs))
 
@@ -73,14 +69,12 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             return m, nil
         }
 
-        // Focus the correct input field
         for i := range m.state.loginPage.inputs {
             m.state.loginPage.inputs[i].Blur()
         }
         m.state.loginPage.inputs[m.state.loginPage.focused].Focus()
     }
 
-    // Update each text input model
     for i := range m.state.loginPage.inputs {
         m.state.loginPage.inputs[i], cmds[i] = m.state.loginPage.inputs[i].Update(msg)
     }
@@ -101,10 +95,8 @@ func (m *model) nextInput() {
 	m.state.loginPage.focused = (m.state.loginPage.focused + 1) % len(m.state.loginPage.inputs)
 }
 
-// prevInput focuses the previous input field
 func (m *model) prevInput() {
 	m.state.loginPage.focused--
-	// Wrap around
 	if m.state.loginPage.focused < 0 {
 		m.state.loginPage.focused = len(m.state.loginPage.inputs) - 1
 	}

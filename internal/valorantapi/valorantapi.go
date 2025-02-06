@@ -36,7 +36,6 @@ func GetAccountPUUID(name string, tag string) string {
 	}
 
 	puuid := acc.Data.Puuid
-	fmt.Println(puuid)
 	return puuid
 }
 
@@ -46,6 +45,7 @@ type Match struct {
     Mode string
     Kills int
     Deaths int
+    Assists int
     CharacterName string
 }
 
@@ -60,7 +60,6 @@ func GetAccountMatches(puuid string) *govapi.GetLifetimeMatchesByPUUIDResponse {
 	if err != nil {
 		fmt.Println("Error fetching matches:", err)
 	}
-	fmt.Printf("Status Code: %v\n", matches.Status)
     
     return matches
 }
@@ -94,6 +93,7 @@ func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse) []Match {
             Mode: match.Meta.Mode,
             Kills: match.Stats.Kills,
             Deaths: match.Stats.Deaths,
+            Assists: match.Stats.Assists,
             CharacterName: match.Stats.Character.Name,
         })
 	}
