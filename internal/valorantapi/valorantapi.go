@@ -23,7 +23,10 @@ func Authorization() *govapi.VAPI {
 }
 
 
-func GetAccountPUUID(name string, tag string, vapi *govapi.VAPI) string {
+var vapi = Authorization()
+
+func GetAccountPUUID(name string, tag string) string {
+    vapi := Authorization()
 	acc, err := vapi.GetAccountByName(govapi.GetAccountByNameParams{
 		Name: name,
 		Tag: tag,
@@ -46,7 +49,7 @@ type Match struct {
     CharacterName string
 }
 
-func GetAccountMatches(puuid string, vapi *govapi.VAPI) *govapi.GetLifetimeMatchesByPUUIDResponse {
+func GetAccountMatches(puuid string) *govapi.GetLifetimeMatchesByPUUIDResponse {
 	matches, err := vapi.GetLifetimeMatchesByPUUID(govapi.GetLifetimeMatchesByPUUIDParams{
 		PUUID: puuid,
 		Affinity: "eu",
@@ -62,7 +65,7 @@ func GetAccountMatches(puuid string, vapi *govapi.VAPI) *govapi.GetLifetimeMatch
     return matches
 }
 
-func GetAccountMMR(puuid string, vapi *govapi.VAPI){
+func GetAccountMMR(puuid string){
 	mmrHistory, err := vapi.GetLifetimeMMRHistoryByPUUID(govapi.GetLifetimeMMRHistoryByPUUIDParams{
 		Affinity: "eu",
 		Puuid: puuid, 

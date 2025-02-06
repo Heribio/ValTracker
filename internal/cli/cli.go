@@ -116,9 +116,7 @@ func (m *model) prevInput() {
 }
 
 func valapi(name string, tag string) {
-    vapi := valorantapi.Authorization()
-
-	puuid := valorantapi.GetAccountPUUID(name, tag, vapi)	
-	valorantapi.GetAccountMatches(puuid, vapi)
-	valorantapi.GetAccountMMR(puuid, vapi)
+	puuid := valorantapi.GetAccountPUUID(name, tag)	
+	valorantapi.GetAccountMatches(puuid)
+	valorantapi.GetAccountMMR(puuid)
 }

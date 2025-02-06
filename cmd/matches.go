@@ -25,9 +25,8 @@ var matchesCmd = &cobra.Command{
         return nil
     },
     Run: func(cmd *cobra.Command, args []string) {
-        vapi := valorantapi.Authorization()
-        puuid := valorantapi.GetAccountPUUID(args [0] , args[1] , vapi)
-        matches := valorantapi.FormatMatches(valorantapi.GetAccountMatches(puuid, vapi))
+        puuid := valorantapi.GetAccountPUUID(args [0] , args[1])
+        matches := valorantapi.FormatMatches(valorantapi.GetAccountMatches(puuid))
         for _, match   := range matches{
             fmt.Println(match.MapName)
             fmt.Println(match.Mode)
