@@ -22,7 +22,7 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
         switch msg.String() {
-        case "ctrl+c":
+        case "ctrl+c", "esc":
 			return m, tea.Quit
         case "<":
             m = m.SwitchPage(loginPage)
@@ -36,7 +36,8 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 //Settings for margin of list
-var docStyle = lipgloss.NewStyle().Margin(2, 3)
+var docStyle = lipgloss.NewStyle().
+    Margin(2, 3)
 
 func (m model) matchListView() string {
     return docStyle.Render(m.state.matchListPage.list.View())
@@ -44,11 +45,11 @@ func (m model) matchListView() string {
 
 //Display of informations in list items
 func (m Match) Title() string {
-    return fmt.Sprintf("%s - %s", m.MapName, m.CharacterName)
+    return fmt.Sprintf("%d-%d %s - %s",m.BlueTeamScore, m.RedTeamScore, m.MapName, m.CharacterName)
 }
 
 func (m Match) Description() string {
-    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d", m.Kills, m.Deaths, m.Assists)
+    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d | ACS: %d", m.Kills, m.Deaths, m.Assists, m.Score/(m.BlueTeamScore+m.RedTeamScore))
 }
 func (i Match) FilterValue() string { return i.Id}
 
@@ -61,22 +62,34 @@ func getMatch(match valorantapi.Match) Match {
         Deaths: match.Deaths,
         Assists: match.Assists,
         CharacterName: match.CharacterName,
+        StartedAt: match.StartedAt,
+        Team: match.Team,
+        BlueTeamScore: match.BlueTeamScore,
+        RedTeamScore: match.RedTeamScore,
+        Score: match.Score,
     }
     return i
 }
 
 //Get matches
-func MatchList() matchListState {
+func MatchList(name string, tag string) matchListState {
     //TODO Get name and tag from loginui
-    puuid := valorantapi.GetAccountPUUID("Name", "Tag")
+    puuid := valorantapi.GetAccountPUUID(name, tag)
     resp := valorantapi.GetAccountMatches(puuid)
-    formattedMatches := valorantapi.FormatMatches(resp)
+    matchList := valorantapi.FormatMatches(resp)
 
-    items := make([]list.Item, len(formattedMatches))
-    for i := range len(formattedMatches){
-        items[i] = getMatch(formattedMatches[i])
+    items := make([]list.Item, len(matchList))
+    for i := range len(matchList){
+        items[i] = getMatch(matchList[i])
     }
 
-    m := matchListState{list: list.New(items, list.NewDefaultDelegate(), 50, 40)}
+    // winColor := lipgloss.Color("#4bff27")
+    // lossColor = lipgloss.Color("f7659")
+
+    windowWidth, windowHeight := 50, 45
+    d := list.NewDefaultDelegate()
+    // d.Styles.SelectedTitle = d.Styles.SelectedTitle.Foreground(winColor)
+
+    m := matchListState{list: list.New(items, d, windowWidth, windowHeight)}
     return m
 }

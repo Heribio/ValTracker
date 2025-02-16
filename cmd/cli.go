@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"github.com/Heribio/ValTracker/internal/cli"
-
+    "github.com/Heribio/ValTracker/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +13,6 @@ var cliCommand= &cobra.Command{
     Use: "cli",
     Short: "Launches the cli version of valtracker",
     Run: func(cmd *cobra.Command, args []string) {
-        cli.UserInput()
+        tui.Run()
     },
 }

@@ -49,7 +49,7 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
         },
         state: state{
             loginPage: InitialModel(),
-            matchListPage: MatchList(),
+            matchListPage: MatchList("", ""),
         },
     }
     return result, nil
@@ -69,7 +69,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     switch msg := msg.(type) {
     case tea.KeyMsg:
         switch msg.String() {
-        case "ctrl+c":
+        case "ctrl+c", "esc":
             return m, tea.Quit
         }
     }

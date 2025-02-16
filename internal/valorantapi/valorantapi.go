@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 
 	"github.com/joho/godotenv"
 	govapi "github.com/yldshv/go-valorant-api"
@@ -47,9 +46,29 @@ type Match struct {
     Deaths int
     Assists int
     CharacterName string
+    StartedAt string 
+    Score   int 
+    Team      string
+    RedTeamScore  int 
+    BlueTeamScore int
 }
 
 func GetAccountMatches(puuid string) *govapi.GetLifetimeMatchesByPUUIDResponse {
+    // const pageCount = 10
+    // var resp []*govapi.GetLifetimeMatchesByPUUIDResponse
+    // for page := range pageCount{
+    //     matches, err := vapi.GetLifetimeMatchesByPUUID(govapi.GetLifetimeMatchesByPUUIDParams{
+    //         PUUID: puuid,
+    //         Affinity: "eu",
+    //         Page: string(page),
+    //         Size: "12",
+    //         Mode: "competitive",
+    //     })
+    //     if err != nil {
+    //         fmt.Println("Error fetching matches:", err)
+    //     }
+    //     resp = append(resp, matches)
+    // }
 	matches, err := vapi.GetLifetimeMatchesByPUUID(govapi.GetLifetimeMatchesByPUUIDParams{
 		PUUID: puuid,
 		Affinity: "eu",
@@ -95,8 +114,11 @@ func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse) []Match {
             Deaths: match.Stats.Deaths,
             Assists: match.Stats.Assists,
             CharacterName: match.Stats.Character.Name,
+            StartedAt: match.Meta.StartedAt,
+            Score: match.Stats.Score,
+            RedTeamScore: match.Teams.Red,
+            BlueTeamScore: match.Teams.Blue,
         })
 	}
-    slices.Reverse(matches)
     return matches
 }

@@ -18,6 +18,7 @@ const (
 	tag
 )
 
+
 type loginState struct {
     inputs []textinput.Model
     focused   int
@@ -53,12 +54,14 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         switch msg.String() {
         case "enter":
             if m.state.loginPage.focused == len(m.state.loginPage.inputs)-1 {
-                valapi(m.state.loginPage.inputs[name].Value(), m.state.loginPage.inputs[tag].Value())
-                return m, tea.Quit
+                m.name = m.state.loginPage.inputs[name].Value()
+                m.tag = m.state.loginPage.inputs[tag].Value()
+                fmt.Printf("registered user %s#%s", m.name, m.tag)
+                return m, nil
             }
             m.nextInput()
             return m, nil
-        case "ctrl+c", "esc", "q":
+        case "ctrl+c", "esc":
             return m, tea.Quit
         case "tab", "down":
             m.nextInput()
