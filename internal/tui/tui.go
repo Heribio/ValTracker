@@ -5,6 +5,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+    "github.com/Heribio/ValTracker/internal/jsonthings"
 )
 
 func Run() {
@@ -41,7 +43,7 @@ type model struct {
 
 func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
     result := model{
-        page: loginPage,
+        page: matchListPage,
         renderer: renderer,
         accountPages: []page{
             loginPage,
@@ -49,7 +51,7 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
         },
         state: state{
             loginPage: InitialModel(),
-            matchListPage: MatchList("", ""),
+            matchListPage: MatchList(jsonthings.GetFileData().Name, jsonthings.GetFileData().Tag),
         },
     }
     return result, nil

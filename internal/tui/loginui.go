@@ -1,11 +1,12 @@
 package tui
 
-import(
+import (
 	"fmt"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/Heribio/ValTracker/internal/jsonthings"
 	"github.com/Heribio/ValTracker/internal/valorantapi"
 )
 
@@ -54,10 +55,13 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         switch msg.String() {
         case "enter":
             if m.state.loginPage.focused == len(m.state.loginPage.inputs)-1 {
-                m.name = m.state.loginPage.inputs[name].Value()
-                m.tag = m.state.loginPage.inputs[tag].Value()
-                fmt.Printf("registered user %s#%s", m.name, m.tag)
-                return m, nil
+                name := m.state.loginPage.inputs[name].Value()
+                tag := m.state.loginPage.inputs[tag].Value()
+                jsonthings.WriteFileData(name, tag)
+                fmt.Printf("Switched to %s#%s", name, tag)
+
+                m.state.matchListPage = MatchList(name, tag)
+                return m.SwitchPage(matchListPage), nil
             }
             m.nextInput()
             return m, nil
@@ -81,7 +85,6 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
     for i := range m.state.loginPage.inputs {
         m.state.loginPage.inputs[i], cmds[i] = m.state.loginPage.inputs[i].Update(msg)
     }
-
     return m, tea.Batch(cmds...)
 }
 
