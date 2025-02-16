@@ -53,24 +53,6 @@ func (m Match) Description() string {
 }
 func (i Match) FilterValue() string { return i.Id}
 
-func getMatch(match valorantapi.Match) Match {
-    i := Match{
-        Id: match.Id,
-        MapName: match.MapName,
-        Mode: match.Mode,
-        Kills: match.Kills,
-        Deaths: match.Deaths,
-        Assists: match.Assists,
-        CharacterName: match.CharacterName,
-        StartedAt: match.StartedAt,
-        Team: match.Team,
-        BlueTeamScore: match.BlueTeamScore,
-        RedTeamScore: match.RedTeamScore,
-        Score: match.Score,
-    }
-    return i
-}
-
 //Get matches
 func MatchList(name string, tag string) matchListState {
     //TODO Get name and tag from loginui
@@ -80,7 +62,7 @@ func MatchList(name string, tag string) matchListState {
 
     items := make([]list.Item, len(matchList))
     for i := range len(matchList){
-        items[i] = getMatch(matchList[i])
+        items[i] = Match(matchList[i])
     }
 
     // winColor := lipgloss.Color("#4bff27")
