@@ -7,7 +7,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/Heribio/ValTracker/internal/jsonthings"
-	"github.com/Heribio/ValTracker/internal/valorantapi"
 )
 
 type (
@@ -48,15 +47,17 @@ func InitialModel() loginState {
 }
 
 func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
-    var cmds []tea.Cmd = make([]tea.Cmd, len(m.state.loginPage.inputs))
+    inputs := m.state.loginPage.inputs
+    focusedEntry := m.state.loginPage.focused
+    var cmds []tea.Cmd = make([]tea.Cmd, len(inputs))
 
     switch msg := msg.(type) {
     case tea.KeyMsg:
         switch msg.String() {
         case "enter":
-            if m.state.loginPage.focused == len(m.state.loginPage.inputs)-1 {
-                name := m.state.loginPage.inputs[name].Value()
-                tag := m.state.loginPage.inputs[tag].Value()
+            if focusedEntry == len(inputs)-1 {
+                name := inputs[name].Value()
+                tag := inputs[tag].Value()
                 jsonthings.WriteFileData(name, tag)
                 fmt.Printf("Switched to %s#%s", name, tag)
 
@@ -76,40 +77,41 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             return m, nil
         }
 
-        for i := range m.state.loginPage.inputs {
-            m.state.loginPage.inputs[i].Blur()
+        for i := range inputs {
+            inputs[i].Blur()
         }
-        m.state.loginPage.inputs[m.state.loginPage.focused].Focus()
+        inputs[m.state.loginPage.focused].Focus()
     }
 
-    for i := range m.state.loginPage.inputs {
-        m.state.loginPage.inputs[i], cmds[i] = m.state.loginPage.inputs[i].Update(msg)
+    for i := range inputs {
+        inputs[i], cmds[i] = inputs[i].Update(msg)
     }
     return m, tea.Batch(cmds...)
 }
 
 
 func (m model) loginView() string {
+    inputs := m.state.loginPage.inputs
+
 	return fmt.Sprintf(
 		"Insert the name and tag of the valorant player\n\n%s\n\n%s",
-		m.state.loginPage.inputs[name].View(),
-		m.state.loginPage.inputs[tag].View(),
+		inputs[name].View(),
+		inputs[tag].View(),
 	) + "\n"
 }
 
 func (m *model) nextInput() {
-	m.state.loginPage.focused = (m.state.loginPage.focused + 1) % len(m.state.loginPage.inputs)
+    focusedEntry := m.state.loginPage.focused
+    inputs := m.state.loginPage.inputs
+
+	m.state.loginPage.focused = (focusedEntry + 1) % len(inputs)
 }
 
 func (m *model) prevInput() {
+    inputs := m.state.loginPage.inputs
+
 	m.state.loginPage.focused--
 	if m.state.loginPage.focused < 0 {
-		m.state.loginPage.focused = len(m.state.loginPage.inputs) - 1
+		m.state.loginPage.focused = len(inputs) - 1
 	}
-}
-
-func valapi(name string, tag string) {
-	puuid := valorantapi.GetAccountPUUID(name, tag)	
-	valorantapi.GetAccountMatches(puuid)
-	valorantapi.GetAccountMMR(puuid)
 }

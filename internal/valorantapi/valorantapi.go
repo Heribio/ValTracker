@@ -53,54 +53,33 @@ type Match struct {
     BlueTeamScore int
 }
 
-func GetAccountMatches(puuid string) *govapi.GetLifetimeMatchesByPUUIDResponse {
-    // const pageCount = 10
-    // var resp []*govapi.GetLifetimeMatchesByPUUIDResponse
-    // for page := range pageCount{
-    //     matches, err := vapi.GetLifetimeMatchesByPUUID(govapi.GetLifetimeMatchesByPUUIDParams{
-    //         PUUID: puuid,
-    //         Affinity: "eu",
-    //         Page: string(page),
-    //         Size: "12",
-    //         Mode: "competitive",
-    //     })
-    //     if err != nil {
-    //         fmt.Println("Error fetching matches:", err)
-    //     }
-    //     resp = append(resp, matches)
-    // }
-	matches, err := vapi.GetLifetimeMatchesByPUUID(govapi.GetLifetimeMatchesByPUUIDParams{
-		PUUID: puuid,
-		Affinity: "eu",
-		Page: "1",
-		Size: "12",
-		Mode: "competitive",
-	})
+func GetAccountMatches(puuid string, page string, affinity string, mode string) []Match {
+	apiresp, err := vapi.GetLifetimeMatchesByPUUID(
+        govapi.GetLifetimeMatchesByPUUIDParams{
+            PUUID: puuid,
+            Affinity: affinity, //eu
+            Page: page,
+            Size: "12",
+            Mode: mode, //competitive
+        })
 	if err != nil {
 		fmt.Println("Error fetching matches:", err)
 	}
-    
+    matches := FormatMatches(apiresp)
     return matches
 }
 
-func GetAccountMMR(puuid string){
+func GetAccountMMR(puuid string, affinity string, page string) *govapi.GetLifetimeMMRHistoryByPUUIDResponse {
 	mmrHistory, err := vapi.GetLifetimeMMRHistoryByPUUID(govapi.GetLifetimeMMRHistoryByPUUIDParams{
-		Affinity: "eu",
+		Affinity: affinity,
 		Puuid: puuid, 
-		Page: "1",
+		Page: page,
 		Size: "12",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	for _, mmrMatch := range mmrHistory.Data {
-		fmt.Printf("Match ID: %s\n", mmrMatch.MatchID)
-		fmt.Printf("Map Name: %s\n", mmrMatch.Map.Name)
-		fmt.Printf("MMR Change: %d\n", mmrMatch.LastMmrChange)
-		fmt.Printf("Elo: %d\n", mmrMatch.Elo)
-		fmt.Println("---")
-	}
+    return mmrHistory
 }
 
 func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse) []Match {
@@ -118,6 +97,7 @@ func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse) []Match {
             Score: match.Stats.Score,
             RedTeamScore: match.Teams.Red,
             BlueTeamScore: match.Teams.Blue,
+            Team: match.Stats.Team,
         })
 	}
     return matches

@@ -110,6 +110,6 @@ func (m model) View() string {
     case matchListPage:
         return m.matchListView()
     default:
-        return m.matchListView()
+        return ""
     }
 }
