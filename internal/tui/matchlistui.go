@@ -41,7 +41,7 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 //Settings for margin of list
 var docStyle = lipgloss.NewStyle().
-    Margin(2, 3)
+    Margin(3, 4)
 
 func (m model) matchListView() string {
     return docStyle.Render(m.state.matchListPage.list.View())
@@ -71,22 +71,34 @@ func (m Match) Title() string {
 }
 
 func (m Match) Description() string {
-    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d | ACS: %d", m.Kills, m.Deaths, m.Assists, m.Score/(m.BlueTeamScore+m.RedTeamScore))
+    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d |          K/D: %.1f | ACS: %d", m.Kills, m.Deaths, m.Assists, float32(m.Kills)/float32(m.Deaths), m.Score/(m.BlueTeamScore+m.RedTeamScore))
 }
 func (i Match) FilterValue() string { return i.StartedAt }
 
 var(
-    winStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder(), false, false, false, true).Foreground(lipgloss.Color("#4bff27")).Bold(true).Padding(0, 2)
-    lossStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder(), false, false, false, true).Foreground(lipgloss.Color("#f7659")).Bold(true).Padding(0, 2)
-    selectedStyle = lipgloss.NewStyle().Bold(true).Padding(0, 2)
-	cursorStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("6")).Bold(true)
-	descStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Italic(true).PaddingLeft(4)
-	separator      = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Render("──────────────────────────")
+    winStyle = lipgloss.NewStyle().
+        Border(lipgloss.ThickBorder(), false, false, false, true).
+        BorderForeground(lipgloss.Color("#5ee790")).
+        Bold(true).
+        Padding(0, 2)
+    lossStyle = lipgloss.NewStyle().
+        Border(lipgloss.ThickBorder(), false, false, false, true).
+        BorderForeground(lipgloss.Color("#e4485d")).
+        Bold(true).
+        Padding(0, 2)
+    selectedStyle = lipgloss.NewStyle().
+        Bold(true).
+        Padding(0, 2).
+        Foreground(lipgloss.Color("#2F6D90"))
+    descStyle = lipgloss.NewStyle().
+        Foreground(lipgloss.Color("8")).
+        PaddingLeft(4)
 )
 
 type matchlistDelegate struct{}
 
 func (d matchlistDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
+    //THAT IS TYPE ASSERTION
 	it, ok := listItem.(Match)
 	if !ok {
 		return
@@ -96,25 +108,20 @@ func (d matchlistDelegate) Render(w io.Writer, m list.Model, index int, listItem
     description := it.Description()
 	var style lipgloss.Style
 
-	if index == m.Index(){
-        style = selectedStyle
-	} else if strings.Contains(strings.ToLower(title), "win") {
+    if strings.Contains(strings.ToLower(title), "win") {
 		style = winStyle
     } else {
 		style = lossStyle
 	}
-
-	cursor := "  " // No cursor for unselected items
-	if index == m.Index() {
-		cursor = cursorStyle.Render(">") // Highlight selected item
-	}
-
-	fmt.Fprintf(w, "%s %s\n%s\n", cursor, style.Render(title), descStyle.Render(description))
+	if index == m.Index(){
+        style = selectedStyle
+	} 
+	fmt.Fprintf(w, "%s\n%s\n", style.Render(title), descStyle.Render(description))
 }
 
 
 func (d matchlistDelegate) Height() int  { return 3 }
-func (d matchlistDelegate) Spacing() int { return 1 }
+func (d matchlistDelegate) Spacing() int { return 0 }
 func (d matchlistDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd{
 	return nil
 }
@@ -129,8 +136,9 @@ func MatchList(name string, tag string) matchListState {
         items[i] = Match(matchList[i])
     }
 
-    windowWidth, windowHeight := 50, 45
+    windowWidth, windowHeight := 100, 40 
     l := list.New(items, matchlistDelegate{}, windowWidth, windowHeight)
+    l.Title = "Matchlist"
 
     m := matchListState{list: l}
     return m
