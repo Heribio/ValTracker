@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+    "github.com/Heribio/ValTracker/internal/jsonthings"
+
 	"github.com/joho/godotenv"
 	govapi "github.com/yldshv/go-valorant-api"
 )
@@ -51,6 +53,14 @@ type Match struct {
     Team      string
     RedTeamScore  int 
     BlueTeamScore int
+}
+
+func AppendMatchList(list []Match, page string, affinity string, mode string) []Match {
+    puuid := GetAccountPUUID(jsonthings.GetFileData().Name, jsonthings.GetFileData().Tag)
+    moreMatches := GetAccountMatches(puuid, page, affinity, mode) 
+
+    list = append(list, moreMatches...)
+    return list
 }
 
 func GetAccountMatches(puuid string, page string, affinity string, mode string) []Match {

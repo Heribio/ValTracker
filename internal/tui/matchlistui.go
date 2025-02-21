@@ -2,8 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"io"
-	"strings"
 
 	"github.com/Heribio/ValTracker/internal/valorantapi"
 	_ "github.com/Heribio/ValTracker/internal/valorantapi"
@@ -30,6 +28,21 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             m = m.SwitchPage(loginPage)
             return m, nil
         case "m":
+            var existingMatches []valorantapi.Match
+            for _, item := range m.state.matchListPage.list.Items() {
+                if match, ok := item.(Match); ok {
+                    existingMatches = append(existingMatches, valorantapi.Match(match))
+                }
+            }
+
+            updatedMatches := valorantapi.AppendMatchList(existingMatches, "1", "eu", "competitive")
+
+            newItems := make([]list.Item, len(updatedMatches))
+            for i, match := range updatedMatches {
+                newItems[i] = Match(match)
+            }
+
+            m.state.matchListPage.list.SetItems(newItems)
             return m, nil
        }
     }
@@ -74,57 +87,6 @@ func (m Match) Description() string {
     return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d |          K/D: %.1f | ACS: %d", m.Kills, m.Deaths, m.Assists, float32(m.Kills)/float32(m.Deaths), m.Score/(m.BlueTeamScore+m.RedTeamScore))
 }
 func (i Match) FilterValue() string { return i.StartedAt }
-
-var(
-    winStyle = lipgloss.NewStyle().
-        Border(lipgloss.ThickBorder(), false, false, false, true).
-        BorderForeground(lipgloss.Color("#5ee790")).
-        Bold(true).
-        Padding(0, 2)
-    lossStyle = lipgloss.NewStyle().
-        Border(lipgloss.ThickBorder(), false, false, false, true).
-        BorderForeground(lipgloss.Color("#e4485d")).
-        Bold(true).
-        Padding(0, 2)
-    selectedStyle = lipgloss.NewStyle().
-        Bold(true).
-        Padding(0, 2).
-        Foreground(lipgloss.Color("#2F6D90"))
-    descStyle = lipgloss.NewStyle().
-        Foreground(lipgloss.Color("8")).
-        PaddingLeft(4)
-)
-
-type matchlistDelegate struct{}
-
-func (d matchlistDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
-    //THAT IS TYPE ASSERTION
-	it, ok := listItem.(Match)
-	if !ok {
-		return
-	}
-
-	title := it.Title()
-    description := it.Description()
-	var style lipgloss.Style
-
-    if strings.Contains(strings.ToLower(title), "win") {
-		style = winStyle
-    } else {
-		style = lossStyle
-	}
-	if index == m.Index(){
-        style = selectedStyle
-	} 
-	fmt.Fprintf(w, "%s\n%s\n", style.Render(title), descStyle.Render(description))
-}
-
-
-func (d matchlistDelegate) Height() int  { return 3 }
-func (d matchlistDelegate) Spacing() int { return 0 }
-func (d matchlistDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd{
-	return nil
-}
 
 //Get matches
 func MatchList(name string, tag string) matchListState {

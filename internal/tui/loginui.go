@@ -89,15 +89,14 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
     return m, tea.Batch(cmds...)
 }
 
-
 func (m model) loginView() string {
     inputs := m.state.loginPage.inputs
 
-	return fmt.Sprintf(
+    return docStyle.Render(fmt.Sprintf(
 		"Insert the name and tag of the valorant player\n\n%s\n\n%s",
 		inputs[name].View(),
 		inputs[tag].View(),
-	) + "\n"
+	) + "\n")
 }
 
 func (m *model) nextInput() {
