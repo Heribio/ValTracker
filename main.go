@@ -1,9 +1,22 @@
 package main
 
 import (
-	 "github.com/Heribio/ValTracker/internal/tui"
+	"fmt"
+
+	"github.com/Heribio/ValTracker/internal/jsonthings"
+	"github.com/Heribio/ValTracker/internal/tui"
+	"github.com/Heribio/ValTracker/internal/valorantapi"
 )
 
 func main() {
-    tui.Run()
+    if valorantapi.CheckToken() {
+        tui.Run()
+    } else {
+        jsonthings.PromptToken()
+        if valorantapi.CheckToken() {
+            fmt.Println("API key working")
+        } else {
+            fmt.Println("API key not working")
+        }
+    }
 }

@@ -1,15 +1,15 @@
 package tui
 
-import(
-    "io"
-    "fmt"
-    "strings"
+import (
+	"fmt"
+	"io"
+	"os"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
-
 
 var(
     winStyle = lipgloss.NewStyle().
@@ -30,6 +30,8 @@ var(
         Foreground(lipgloss.Color("8")).
         PaddingLeft(4)
 )
+
+var re = lipgloss.NewRenderer(os.Stdout)
 
 type matchlistDelegate struct{}
 
@@ -61,4 +63,5 @@ func (d matchlistDelegate) Spacing() int { return 0 }
 func (d matchlistDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd{
 	return nil
 }
+
 

@@ -66,13 +66,13 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             }
             m.nextInput()
             return m, nil
-        case "ctrl+c", "esc":
+        case "ctrl+c":
             return m, tea.Quit
         case "tab", "down":
             m.nextInput()
         case "shift+tab", "up":
             m.prevInput()
-        case "<":
+        case "esc":
             m = m.SwitchPage(matchListPage)
             return m, nil
         }

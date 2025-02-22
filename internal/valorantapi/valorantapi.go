@@ -3,21 +3,23 @@ package valorantapi
 import (
 	"fmt"
 	"log"
-	"os"
+	// "os"
 
     "github.com/Heribio/ValTracker/internal/jsonthings"
 
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 	govapi "github.com/yldshv/go-valorant-api"
 )
 
 func Authorization() *govapi.VAPI {
-	err := godotenv.Load("cmd/.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	apikey := os.Getenv("VALOAPIKEY")
+	// err := godotenv.Load("cmd/.env")
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
+	//
+	// apikey := os.Getenv("VALOAPIKEY")
+    tokenData := jsonthings.GetTokenData()
+    apikey := tokenData.ValApiToken
 
 	vapi := govapi.New(govapi.WithKey(apikey))
 	return vapi
@@ -56,7 +58,7 @@ type Match struct {
 }
 
 func AppendMatchList(list []Match, page string, affinity string, mode string) []Match {
-    puuid := GetAccountPUUID(jsonthings.GetFileData().Name, jsonthings.GetFileData().Tag)
+    puuid := GetAccountPUUID(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag)
     moreMatches := GetAccountMatches(puuid, page, affinity, mode) 
 
     list = append(list, moreMatches...)
@@ -90,6 +92,25 @@ func GetAccountMMR(puuid string, affinity string, page string) *govapi.GetLifeti
 		log.Fatal(err)
 	}
     return mmrHistory
+}
+
+func CheckToken() bool {
+    token := jsonthings.GetTokenData().ValApiToken
+    vapi := govapi.New(govapi.WithKey(token))
+    params := govapi.GetStatusParams{
+        Affinity: "eu",
+    }
+
+    var resp *govapi.GetStatusResponse
+    resp, err := vapi.GetStatus(params)
+    if err != nil {
+        log.Fatal("GetStatus did not work for CheckToken")
+    }
+    if resp.Errors != nil {
+        return false
+    } else {
+        return true
+    }
 }
 
 func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse) []Match {

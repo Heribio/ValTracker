@@ -6,6 +6,7 @@ import (
 	"github.com/Heribio/ValTracker/internal/valorantapi"
 	_ "github.com/Heribio/ValTracker/internal/valorantapi"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -21,13 +22,11 @@ type Match valorantapi.Match
 func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-        switch msg.String() {
-        case "ctrl+c", "esc":
-			return m, tea.Quit
-        case "<":
+        switch {
+        case key.Matches(msg, keys.LoginPageBinding):
             m = m.SwitchPage(loginPage)
             return m, nil
-        case "m":
+        case key.Matches(msg, keys.MatchPageBinding):
             var existingMatches []valorantapi.Match
             for _, item := range m.state.matchListPage.list.Items() {
                 if match, ok := item.(Match); ok {
@@ -44,6 +43,17 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
             m.state.matchListPage.list.SetItems(newItems)
             return m, nil
+        }
+
+        switch msg.String() {
+        case "ctrl+c", "esc":
+			return m, tea.Quit
+                case "enter":
+            if selectedItem, ok := m.state.matchListPage.list.SelectedItem().(Match); ok {
+				m.selectedMatch = &selectedItem 
+				m = m.SwitchPage(selectedMatchPage)
+            }
+			return m, nil
        }
     }
 
