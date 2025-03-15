@@ -2,6 +2,8 @@ package tui
 
 import (
 	"fmt"
+	"strconv"
+    "time"
 
 	"github.com/Heribio/ValTracker/internal/valorantapi"
 	_ "github.com/Heribio/ValTracker/internal/valorantapi"
@@ -19,6 +21,9 @@ type matchListState struct {
 
 type Match valorantapi.Match
 
+
+var matchpage = 2 
+
 func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -34,7 +39,8 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
                 }
             }
 
-            updatedMatches := valorantapi.AppendMatchList(existingMatches, "1", "eu", "competitive")
+            updatedMatches := valorantapi.AppendMatchList(existingMatches, strconv.Itoa(matchpage), "eu", "competitive")
+            matchpage++
 
             newItems := make([]list.Item, len(updatedMatches))
             for i, match := range updatedMatches {
@@ -72,29 +78,42 @@ func (m model) matchListView() string {
 
 //Display of informations in list items
 func (m Match) Title() string {
+    matchTime, err := time.Parse(time.RFC3339Nano, m.StartedAt)
+    matchDay, matchMonth, matchYear, matchHour, matchMinute := matchTime.Day(), matchTime.Month(), matchTime.Year(), matchTime.Hour(), matchTime.Minute()
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+	}
+
     if (m.Team == "Blue") {
         if (m.BlueTeamScore > m.RedTeamScore){
-            return fmt.Sprintf("Win - %d-%d %s - %s",m.BlueTeamScore, m.RedTeamScore, m.MapName, m.CharacterName)
+            return fmt.Sprintf("Win - %d-%d %s - %s  %d %s %d %dh%d",
+                m.BlueTeamScore, m.RedTeamScore, m.MapName, m.CharacterName, matchDay, matchMonth, matchYear, matchHour, matchMinute)
         }
         if (m.BlueTeamScore < m.RedTeamScore){
-            return fmt.Sprintf("Loss - %d-%d %s - %s",m.BlueTeamScore, m.RedTeamScore, m.MapName, m.CharacterName)
+            return fmt.Sprintf("Loss - %d-%d %s - %s  %d %s %d %dh%d",
+                m.BlueTeamScore, m.RedTeamScore, m.MapName, m.CharacterName, matchDay, matchMonth, matchYear, matchHour, matchMinute)
         } else {
-            return fmt.Sprintf("Draw- %d-%d %s - %s",m.BlueTeamScore, m.RedTeamScore, m.MapName, m.CharacterName)
+            return fmt.Sprintf("Draw - %d-%d %s - %s  %d %s %d %dh%d",
+                m.BlueTeamScore, m.RedTeamScore, m.MapName, m.CharacterName, matchDay, matchMonth, matchYear, matchHour, matchMinute)
         }
     } else {
         if (m.BlueTeamScore < m.RedTeamScore){
-            return fmt.Sprintf("Win - %d-%d %s - %s",m.RedTeamScore, m.BlueTeamScore, m.MapName, m.CharacterName)
+            return fmt.Sprintf("Win - %d-%d %s - %s  %d %s %d %dh%d",
+                m.RedTeamScore, m.BlueTeamScore, m.MapName, m.CharacterName, matchDay, matchMonth, matchYear, matchHour, matchMinute)
         }
         if (m.BlueTeamScore > m.RedTeamScore){
-            return fmt.Sprintf("Loss - %d-%d %s - %s",m.RedTeamScore, m.BlueTeamScore, m.MapName, m.CharacterName)
+            return fmt.Sprintf("Loss- %d-%d %s - %s  %d %s %d %dh%d",
+                m.RedTeamScore, m.BlueTeamScore, m.MapName, m.CharacterName, matchDay, matchMonth, matchYear, matchHour, matchMinute)
         } else {
-            return fmt.Sprintf("Draw- %d-%d %s - %s",m.RedTeamScore, m.BlueTeamScore, m.MapName, m.CharacterName)
+            return fmt.Sprintf("Draw- %d-%d %s - %s  %d %s %d %dh%d",
+                m.RedTeamScore, m.BlueTeamScore, m.MapName, m.CharacterName, matchDay, matchMonth, matchYear, matchHour, matchMinute)
         }
     }
 }
 
 func (m Match) Description() string {
-    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d |          K/D: %.1f | ACS: %d", m.Kills, m.Deaths, m.Assists, float32(m.Kills)/float32(m.Deaths), m.Score/(m.BlueTeamScore+m.RedTeamScore))
+    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d |          K/D: %.1f | ACS: %d",
+        m.Kills, m.Deaths, m.Assists, float32(m.Kills)/float32(m.Deaths), m.Score/(m.BlueTeamScore+m.RedTeamScore))
 }
 func (i Match) FilterValue() string { return i.StartedAt }
 
@@ -110,7 +129,7 @@ func MatchList(name string, tag string) matchListState {
 
     windowWidth, windowHeight := 100, 40 
     l := list.New(items, matchlistDelegate{}, windowWidth, windowHeight)
-    l.Title = "Matchlist"
+    l.Title = fmt.Sprintf("%s#%s", name, tag)
 
     m := matchListState{list: l}
     return m

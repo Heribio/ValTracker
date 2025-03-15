@@ -1,32 +1,39 @@
 package valorantapi
 
 import (
-	"fmt"
 	"log"
-	// "os"
+    "fmt"
 
     "github.com/Heribio/ValTracker/internal/jsonthings"
 
-	// "github.com/joho/godotenv"
 	govapi "github.com/yldshv/go-valorant-api"
 )
 
+type Match struct { 
+    Id string
+    MapName string
+    Mode string
+    Kills int
+    Deaths int
+    Assists int
+    CharacterName string
+    StartedAt string 
+    Score   int 
+    Team      string
+    RedTeamScore  int 
+    BlueTeamScore int
+    Rank string
+}
+
+var vapi = Authorization()
+
 func Authorization() *govapi.VAPI {
-	// err := godotenv.Load("cmd/.env")
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-	//
-	// apikey := os.Getenv("VALOAPIKEY")
     tokenData := jsonthings.GetTokenData()
     apikey := tokenData.ValApiToken
 
 	vapi := govapi.New(govapi.WithKey(apikey))
 	return vapi
 }
-
-
-var vapi = Authorization()
 
 func GetAccountPUUID(name string, tag string) string {
     vapi := Authorization()
@@ -42,21 +49,6 @@ func GetAccountPUUID(name string, tag string) string {
 	return puuid
 }
 
-type Match struct { 
-    Id string
-    MapName string
-    Mode string
-    Kills int
-    Deaths int
-    Assists int
-    CharacterName string
-    StartedAt string 
-    Score   int 
-    Team      string
-    RedTeamScore  int 
-    BlueTeamScore int
-}
-
 func AppendMatchList(list []Match, page string, affinity string, mode string) []Match {
     puuid := GetAccountPUUID(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag)
     moreMatches := GetAccountMatches(puuid, page, affinity, mode) 
@@ -66,27 +58,33 @@ func AppendMatchList(list []Match, page string, affinity string, mode string) []
 }
 
 func GetAccountMatches(puuid string, page string, affinity string, mode string) []Match {
+    size := "10"
 	apiresp, err := vapi.GetLifetimeMatchesByPUUID(
         govapi.GetLifetimeMatchesByPUUIDParams{
             PUUID: puuid,
             Affinity: affinity, //eu
             Page: page,
-            Size: "12",
+            Size: size,
             Mode: mode, //competitive
         })
 	if err != nil {
 		fmt.Println("Error fetching matches:", err)
 	}
-    matches := FormatMatches(apiresp)
+    mmrApiResp, err := vapi.GetLifetimeMMRHistoryByPUUID(
+        govapi.GetLifetimeMMRHistoryByPUUIDParams{
+            Puuid: puuid,
+            Affinity: affinity,
+            Size: size,
+            Page: page,
+        })
+    matches := FormatMatches(apiresp, mmrApiResp)
     return matches
 }
 
-func GetAccountMMR(puuid string, affinity string, page string) *govapi.GetLifetimeMMRHistoryByPUUIDResponse {
-	mmrHistory, err := vapi.GetLifetimeMMRHistoryByPUUID(govapi.GetLifetimeMMRHistoryByPUUIDParams{
-		Affinity: affinity,
+func GetAccountMMR(puuid string, affinity string) *govapi.GetMMRByPUUIDv2Response{
+	mmrHistory, err := vapi.GetMMRByPUUIDv2(govapi.GetMMRByPUUIDv2Params{
+        Affinity: affinity,
 		Puuid: puuid, 
-		Page: page,
-		Size: "12",
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -113,7 +111,7 @@ func CheckToken() bool {
     }
 }
 
-func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse) []Match {
+func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse, mmrResponse *govapi.GetLifetimeMMRHistoryByPUUIDResponse) []Match {
     var matches []Match
 	for _, match := range response.Data {
         matches = append(matches, Match{
@@ -132,4 +130,10 @@ func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse) []Match {
         })
 	}
     return matches
+}
+
+func getMMR() string {
+    puuid := GetAccountPUUID(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag)
+    mmrList := GetAccountMMR(puuid, "eu") 
+    return mmrList.Data.CurrentData.CurrenttierPatched
 }

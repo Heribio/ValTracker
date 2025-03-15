@@ -1,9 +1,7 @@
 package tui
 
-import(
-    "fmt"
-
-    tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type overViewState struct {
@@ -25,5 +23,5 @@ func (m model) overViewUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) overViewView() string {
-    return fmt.Sprintf("%s - %s", m.selectedMatch.CharacterName, m.selectedMatch.Mode)
+    return "Overview Page"
 }
