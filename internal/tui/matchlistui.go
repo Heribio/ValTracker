@@ -93,7 +93,7 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
                 }
             }
 
-            updatedMatches := valorantapi.AppendMatchList(existingMatches, strconv.Itoa(matchpage), "eu", "competitive")
+            updatedMatches := valorantapi.AppendMatchList(existingMatches, strconv.Itoa(matchpage), "eu", m.mode)
             matchpage++
 
             newItems := make([]list.Item, len(updatedMatches))
