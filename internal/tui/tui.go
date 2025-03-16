@@ -39,12 +39,13 @@ type model struct {
     page         page
     renderer     *lipgloss.Renderer
     accountPages []page
-    switched     bool
     state        state
     name         string
     tag          string
     selectedMatch *Match
+    mode         string
 }
+
 
 func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
     result := model{
@@ -58,8 +59,9 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
         },
         state: state{
             loginPage: InitialModel(),
-            matchListPage: MatchList(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag),
+            matchListPage: MatchList(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag, "competitive"),
         },
+        mode: "competitive",
     }
     return result, nil
 }
@@ -70,7 +72,6 @@ func (m model) Init() tea.Cmd {
 
 func (m model) SwitchPage(page page) model {
     m.page = page
-    m.switched = true
     return m
 }
 
@@ -111,11 +112,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         }
      }
    
-
-    if m.switched {
-		m.switched = false
-	}
-
     var headerCmd tea.Cmd
 
     cmds := []tea.Cmd{headerCmd}

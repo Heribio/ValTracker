@@ -61,7 +61,7 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
                 jsonthings.WriteFileData(name, tag)
                 fmt.Printf("Switched to %s#%s", name, tag)
 
-                m.state.matchListPage = MatchList(name, tag)
+                m.state.matchListPage = MatchList(name, tag, m.mode)
                 return m.SwitchPage(matchListPage), nil
             }
             m.nextInput()

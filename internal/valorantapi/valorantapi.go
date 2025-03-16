@@ -65,7 +65,7 @@ func GetAccountMatches(puuid string, page string, affinity string, mode string) 
             Affinity: affinity, //eu
             Page: page,
             Size: size,
-            Mode: mode, //competitive
+            Mode: mode, 
         })
 	if err != nil {
 		fmt.Println("Error fetching matches:", err)
