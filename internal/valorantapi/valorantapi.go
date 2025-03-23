@@ -95,14 +95,13 @@ func GetAccountMMR(puuid string, affinity string) *govapi.GetMMRByPUUIDv2Respons
 func CheckToken() bool {
     token := jsonthings.GetTokenData().ValApiToken
     vapi := govapi.New(govapi.WithKey(token))
-    params := govapi.GetStatusParams{
-        Affinity: "eu",
-    }
+    params := govapi.GetEsportsScheduleParams{}
 
-    var resp *govapi.GetStatusResponse
-    resp, err := vapi.GetStatus(params)
+    var resp *govapi.GetEsportsScheduleResponse
+    resp, err := vapi.GetEsportsSchedule(params)
     if err != nil {
-        log.Fatal("GetStatus did not work for CheckToken")
+        fmt.Println(resp)
+        log.Fatal("GetVersion did not work for CheckToken\n", err)
     }
     if resp.Errors != nil {
         return false
