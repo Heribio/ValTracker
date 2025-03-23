@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	govapi "github.com/Heribio/go-valorant-api"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -34,6 +35,9 @@ var(
 var re = lipgloss.NewRenderer(os.Stdout)
 
 type matchlistDelegate struct{}
+type selectedmatchDelegate struct{
+    match *govapi.GetMatchResponse
+}
 
 func (d matchlistDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
     //THAT IS TYPE ASSERTION
@@ -64,4 +68,30 @@ func (d matchlistDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd{
 	return nil
 }
 
+func (d selectedmatchDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
+    it, ok := listItem.(Player)
+    if !ok {
+        return
+    }
 
+    title := it.Title()
+    description := it.Description()
+    var style lipgloss.Style
+    if it.Team == "Red" {
+        style = lossStyle
+    } else {
+        style = winStyle
+    }
+
+    if index == m.Index(){
+        style = selectedStyle
+    }
+
+    fmt.Fprintf(w, "%s\n%s\n", style.Render(title), descStyle.Render(description))
+}
+
+func (d selectedmatchDelegate) Height() int  { return 3 }
+func (d selectedmatchDelegate) Spacing() int { return 0 }
+func (d selectedmatchDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd{
+	return nil
+}

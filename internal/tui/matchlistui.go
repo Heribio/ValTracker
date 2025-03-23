@@ -23,7 +23,6 @@ type matchListState struct {
 
 type Match valorantapi.Match
 
-
 var matchpage = 2 
 
 var modes = []string{"competitive", "unrated", "deathmatch", "swiftplay"} 
@@ -104,13 +103,13 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             m.state.matchListPage.list.SetItems(newItems)
             return m, nil
         }
-
         switch msg.String() {
         case "ctrl+c", "esc":
 			return m, tea.Quit
                 case "enter":
             if selectedItem, ok := m.state.matchListPage.list.SelectedItem().(Match); ok {
 				m.selectedMatch = &selectedItem 
+                m.state.selectedMatchPage = SelectedMatchList(m.selectedMatch.Id)
 				m = m.SwitchPage(selectedMatchPage)
             }
 			return m, nil
@@ -118,7 +117,7 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
     }
 
     var cmd tea.Cmd
-	m.state.matchListPage.list, cmd= m.state.matchListPage.list.Update(msg)
+	m.state.matchListPage.list, cmd = m.state.matchListPage.list.Update(msg)
 	return m, cmd
 }
 

@@ -6,7 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-    "github.com/Heribio/ValTracker/internal/jsonthings"
+	"github.com/Heribio/ValTracker/internal/jsonthings"
 )
 
 func Run() {
@@ -60,6 +60,7 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
         state: state{
             loginPage: InitialModel(),
             matchListPage: MatchList(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag, "competitive"),
+            selectedMatchPage: SelectedMatchList("123e4567-e89b-12d3-a456-426614174000"),
         },
         mode: "competitive",
     }

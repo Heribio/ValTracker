@@ -3,10 +3,10 @@ module github.com/Heribio/ValTracker
 go 1.23.4
 
 require (
+	github.com/Heribio/go-valorant-api v0.0.0-20250323155429-8b18bdea6476
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
-	github.com/yldshv/go-valorant-api v1.0.7
 )
 
 require (

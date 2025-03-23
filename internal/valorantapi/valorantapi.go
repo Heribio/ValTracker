@@ -6,7 +6,7 @@ import (
 
     "github.com/Heribio/ValTracker/internal/jsonthings"
 
-	govapi "github.com/yldshv/go-valorant-api"
+	govapi "github.com/Heribio/go-valorant-api"
 )
 
 type Match struct { 
@@ -23,6 +23,19 @@ type Match struct {
     RedTeamScore  int 
     BlueTeamScore int
     Rank string
+}
+
+type Player struct {
+    PUUID    string
+    Username string
+    Kills int
+    Deaths int
+    Assists int
+    CharacterName string
+    Score   int 
+    Team      string
+    Rank    string
+    Rounds  int
 }
 
 var vapi = Authorization()
@@ -55,6 +68,36 @@ func AppendMatchList(list []Match, page string, affinity string, mode string) []
 
     list = append(list, moreMatches...)
     return list
+}
+
+func GetMatch(matchID string) *govapi.GetMatchResponse{
+    params := govapi.GetMatchParams{
+        MatchId: matchID,
+    }
+    match, err := vapi.GetMatch(params)
+    if err != nil {
+        log.Fatal("Problem getting match", err)
+    }
+    return match
+}
+
+func GetPlayers(match *govapi.GetMatchResponse) []Player {
+    var players []Player
+    for _, player := range match.Data.Players.AllPlayers{
+        players = append(players, Player{
+            PUUID: player.Puuid,
+            Username: player.Name,
+            Kills: player.Stats.Kills,
+            Deaths: player.Stats.Deaths,
+            Assists: player.Stats.Assists,
+            Score: player.Stats.Score,
+            Rank: player.CurrenttierPatched,
+            CharacterName: player.Character,
+            Team: player.Team,
+            Rounds : match.Data.Metadata.RoundsPlayed,
+        })
+    }
+    return players
 }
 
 func GetAccountMatches(puuid string, page string, affinity string, mode string) []Match {
