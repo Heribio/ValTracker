@@ -28,6 +28,7 @@ type Match struct {
 type Player struct {
     PUUID    string
     Username string
+    Tag     string
     Kills int
     Deaths int
     Assists int
@@ -87,6 +88,7 @@ func GetPlayers(match *govapi.GetMatchResponse) []Player {
         players = append(players, Player{
             PUUID: player.Puuid,
             Username: player.Name,
+            Tag: player.Tag,
             Kills: player.Stats.Kills,
             Deaths: player.Stats.Deaths,
             Assists: player.Stats.Assists,

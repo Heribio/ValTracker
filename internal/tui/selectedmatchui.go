@@ -20,6 +20,12 @@ func (m model) selectMatchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         switch msg.String() {
         case "ctrl+c":
 			return m, tea.Quit
+        case "enter":
+            if selectedItem, ok := m.state.selectedMatchPage.list.SelectedItem().(Player); ok {
+                m.state.matchListPage = MatchList(selectedItem.Username, selectedItem.Tag, "competitive")
+                m = m.SwitchPage(matchListPage)
+            }
+            return m, nil
         case "esc":
             m = m.SwitchPage(matchListPage)
             return m, nil
