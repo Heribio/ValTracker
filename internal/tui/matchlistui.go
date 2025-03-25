@@ -80,8 +80,8 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             m.state.matchListPage.list.Title = fmt.Sprintf("%s: %s#%s", mode, name, tag)
             return m, nil
 
-        case key.Matches(msg, keys.LoginPageBinding):
-            m = m.SwitchPage(loginPage)
+        case key.Matches(msg, keys.SearchPageBinding):
+            m = m.SwitchPage(searchPage)
 
             return m, nil
         case key.Matches(msg, keys.MatchPageBinding):
@@ -106,7 +106,7 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         switch msg.String() {
         case "ctrl+c", "esc":
 			return m, tea.Quit
-                case "enter":
+        case "enter":
             if selectedItem, ok := m.state.matchListPage.list.SelectedItem().(Match); ok {
 				m.selectedMatch = &selectedItem 
                 m.state.selectedMatchPage = SelectedMatchList(m.selectedMatch.Id)

@@ -19,13 +19,13 @@ const (
 )
 
 
-type loginState struct {
+type searchState struct {
     inputs []textinput.Model
     focused   int
     err       error
 }
 
-func InitialModel() loginState {
+func InitialModel() searchState {
     inputs := make([]textinput.Model, 2)
 
 	inputs[name] = textinput.New()
@@ -39,16 +39,16 @@ func InitialModel() loginState {
 	inputs[tag].CharLimit = 6
 	inputs[tag].Width = 20
 
-	return loginState{
+	return searchState{
 		inputs: inputs,
 		focused: 0,
 		err:       nil,
 	}
 }
 
-func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
-    inputs := m.state.loginPage.inputs
-    focusedEntry := m.state.loginPage.focused
+func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+    inputs := m.state.searchPage.inputs
+    focusedEntry := m.state.searchPage.focused
     var cmds []tea.Cmd = make([]tea.Cmd, len(inputs))
 
     switch msg := msg.(type) {
@@ -80,7 +80,7 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         for i := range inputs {
             inputs[i].Blur()
         }
-        inputs[m.state.loginPage.focused].Focus()
+        inputs[m.state.searchPage.focused].Focus()
     }
 
     for i := range inputs {
@@ -89,8 +89,8 @@ func (m model) loginUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
     return m, tea.Batch(cmds...)
 }
 
-func (m model) loginView() string {
-    inputs := m.state.loginPage.inputs
+func (m model) searchView() string {
+    inputs := m.state.searchPage.inputs
 
     return docStyle.Render(fmt.Sprintf(
 		"Insert the name and tag of the valorant player\n\n%s\n\n%s",
@@ -100,17 +100,17 @@ func (m model) loginView() string {
 }
 
 func (m *model) nextInput() {
-    focusedEntry := m.state.loginPage.focused
-    inputs := m.state.loginPage.inputs
+    focusedEntry := m.state.searchPage.focused
+    inputs := m.state.searchPage.inputs
 
-	m.state.loginPage.focused = (focusedEntry + 1) % len(inputs)
+	m.state.searchPage.focused = (focusedEntry + 1) % len(inputs)
 }
 
 func (m *model) prevInput() {
-    inputs := m.state.loginPage.inputs
+    inputs := m.state.searchPage.inputs
 
-	m.state.loginPage.focused--
-	if m.state.loginPage.focused < 0 {
-		m.state.loginPage.focused = len(inputs) - 1
+	m.state.searchPage.focused--
+	if m.state.searchPage.focused < 0 {
+		m.state.searchPage.focused = len(inputs) - 1
 	}
 }

@@ -23,14 +23,14 @@ type page = int
 
 const(
     overviewPage = iota
-    loginPage
+    searchPage
     matchListPage
     selectedMatchPage
 )
 
 type state struct {
     overviewPage overViewState
-    loginPage   loginState
+    searchPage   searchState
     matchListPage  matchListState
     selectedMatchPage selectedMatchState
 }
@@ -53,12 +53,12 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
         renderer: renderer,
         accountPages: []page{
             overviewPage,
-            loginPage,
+            searchPage,
             matchListPage,
             selectedMatchPage,
         },
         state: state{
-            loginPage: InitialModel(),
+            searchPage: InitialModel(),
             matchListPage: MatchList(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag, "competitive"),
             selectedMatchPage: SelectedMatchList("123e4567-e89b-12d3-a456-426614174000"),
         },
@@ -93,9 +93,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         if newModel, ok := updatedModel.(model); ok {
             m = newModel
         }
-    case loginPage:
+    case searchPage:
         var updatedModel tea.Model
-        updatedModel, cmd = m.loginUpdate(msg)
+        updatedModel, cmd = m.searchUpdate(msg)
         if newModel, ok := updatedModel.(model); ok {
             m = newModel
         }
@@ -124,8 +124,8 @@ func (m model) View() string {
     switch m.page{
     case overviewPage:
         return m.overViewView()
-    case loginPage:
-        return m.loginView()
+    case searchPage:
+        return m.searchView()
     case matchListPage:
         return m.matchListView()
     case selectedMatchPage:
