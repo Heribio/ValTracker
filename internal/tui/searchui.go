@@ -2,11 +2,13 @@ package tui
 
 import (
 	"fmt"
+	_ "fmt"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/Heribio/ValTracker/internal/jsonthings"
+	_ "github.com/Heribio/ValTracker/internal/jsonthings"
 )
 
 type (
@@ -19,13 +21,16 @@ const (
 )
 
 
+
 type searchState struct {
     inputs []textinput.Model
+    favorites []jsonthings.Username
     focused   int
     err       error
 }
 
 func InitialModel() searchState {
+    favorites := jsonthings.GetFavoriteData().Favorites
     inputs := make([]textinput.Model, 2)
 
 	inputs[name] = textinput.New()
@@ -41,6 +46,7 @@ func InitialModel() searchState {
 
 	return searchState{
 		inputs: inputs,
+        favorites: favorites,
 		focused: 0,
 		err:       nil,
 	}
@@ -59,7 +65,6 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
                 name := inputs[name].Value()
                 tag := inputs[tag].Value()
                 jsonthings.WriteFileData(name, tag)
-                fmt.Printf("Switched to %s#%s", name, tag)
 
                 m.state.matchListPage = MatchList(name, tag, m.mode)
                 return m.SwitchPage(matchListPage), nil
@@ -75,7 +80,37 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "esc":
             m = m.SwitchPage(matchListPage)
             return m, nil
+        case "ctrl+h":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[0]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+        case "ctrl+j":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[1]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+        case "ctrl+k":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[2]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+        case "ctrl+l":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[3]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+
         }
+
 
         for i := range inputs {
             inputs[i].Blur()
@@ -91,12 +126,16 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) searchView() string {
     inputs := m.state.searchPage.inputs
-
+    favorites := m.state.searchPage.favorites
+    var favoriteView string
+    for i := range favorites {
+        favoriteView = favoriteView + fmt.Sprintf("%d: %s#%s\n", i, favorites[i].Name, favorites[i].Tag)
+    }
     return docStyle.Render(fmt.Sprintf(
 		"Insert the name and tag of the valorant player\n\n%s\n\n%s",
 		inputs[name].View(),
 		inputs[tag].View(),
-	) + "\n")
+	) + "\n\n" +favoriteView)
 }
 
 func (m *model) nextInput() {

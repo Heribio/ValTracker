@@ -104,6 +104,41 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             return m, nil
         }
         switch msg.String() {
+        case "ctrl+f":
+            data := jsonthings.GetFileData("data.json")
+            player := jsonthings.Username{Name: data.Name, Tag: data.Tag}
+            params := jsonthings.WriteFavoriteParams{Player: player}
+            jsonthings.WriteFavoriteData(params)
+        case "ctrl+h":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[0]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+        case "ctrl+j":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[1]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+        case "ctrl+k":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[2]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+        case "ctrl+l":
+            favoriteData := jsonthings.GetFavoriteData()
+            player := favoriteData.Favorites[3]
+            jsonthings.WriteFileData(player.Name, player.Tag)
+
+            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+            return m.SwitchPage(matchListPage), nil
+
+
         case "ctrl+c", "esc":
 			return m, tea.Quit
         case "enter":

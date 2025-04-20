@@ -6,8 +6,7 @@ https://github.com/Henrik-3/unofficial-valorant-api.
 
 It is completely built in go with the help of the bubbletea framework and go-valorant-api
 
-
-https://github.com/user-attachments/assets/c6ecfe2d-8f81-4985-b816-88eeb2ca4c2e
+<video src="valtracker.mp4" controls width="900"></video>
 
 ## Usage
 You will need a api key to use this program. You can get one from this ![discord server](https://discord.com/invite/X3GaVkX2YN).

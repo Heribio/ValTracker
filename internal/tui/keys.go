@@ -7,6 +7,7 @@ type keyMap struct {
     SearchPageBinding key.Binding
     NextModeBinding key.Binding
     PreviousModeBinding key.Binding
+    FavoriteBinding key.Binding
 }
 
 var keys = keyMap{
@@ -25,5 +26,9 @@ var keys = keyMap{
     PreviousModeBinding: key.NewBinding(
         key.WithKeys("left"),
         key.WithHelp("←", "Previous mode"),
+        ),
+    FavoriteBinding: key.NewBinding(
+        key.WithKeys("f"),
+        key.WithHelp("f", "Favorite a player"),
         ),
 }
