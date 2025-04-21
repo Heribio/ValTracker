@@ -61,10 +61,17 @@ func SelectedMatchList(selectedMatch string) selectedMatchState{
     match := valorantapi.GetMatch(selectedMatch)
     players := valorantapi.GetPlayers(match)
 
-    items := make([]list.Item, len(players))
-    for i := range len(players){
-        items[i] = Player(players[i])
+    var items []list.Item
+    for _, player := range players {
+        if player.Team == "Red" {
+            items = append([]list.Item{Player(player)}, items...)
+        }
     }
+    for _, player := range players {
+    if player.Team == "Blue" {
+        items = append([]list.Item{Player(player)}, items...)
+    }
+}
 
     windowWidth, windowHeight := 100, 40 
     list := list.New(items, selectedmatchDelegate{match: match}, windowWidth, windowHeight)
