@@ -41,8 +41,11 @@ func (m Player) Title() string {
 }
 
 func (m Player) Description() string {
-    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d          K/D: %.1f | ACS: %d",
-        m.Kills, m.Deaths, m.Assists, float32(m.Kills)/float32(m.Deaths), m.Score/m.Rounds)
+    totalshots := m.Bodyshots+m.Headshots+m.Legshots
+    headshotPercentage := float64(m.Headshots)/float64(totalshots)*100
+
+    return fmt.Sprintf("Kills: %d | Deaths: %d | Assists: %d          K/D: %.1f | ACS: %d | HS: %.1f%%",
+        m.Kills, m.Deaths, m.Assists, float32(m.Kills)/float32(m.Deaths), m.Score/m.Rounds, headshotPercentage)
 }
 
 func (i Player) FilterValue() string {return i.Username}

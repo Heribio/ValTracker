@@ -23,6 +23,9 @@ type Match struct {
     RedTeamScore  int 
     BlueTeamScore int
     Rank string
+    Headshots int
+    Bodyshots int
+    Legshots int
 }
 
 type Player struct {
@@ -37,6 +40,9 @@ type Player struct {
     Team      string
     Rank    string
     Rounds  int
+    Headshots int
+    Bodyshots int
+    Legshots int
 }
 
 var vapi = Authorization()
@@ -97,6 +103,9 @@ func GetPlayers(match *govapi.GetMatchResponse) []Player {
             CharacterName: player.Character,
             Team: player.Team,
             Rounds : match.Data.Metadata.RoundsPlayed,
+            Headshots: player.Stats.Headshots,
+            Bodyshots: player.Stats.Bodyshots,
+            Legshots: player.Stats.Legshots,
         })
     }
     return players
@@ -171,6 +180,9 @@ func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse, mmrRespon
             RedTeamScore: match.Teams.Red,
             BlueTeamScore: match.Teams.Blue,
             Team: match.Stats.Team,
+            Headshots: match.Stats.Shots.Head, 
+            Bodyshots: match.Stats.Shots.Body, 
+            Legshots: match.Stats.Shots.Leg, 
         })
 	}
     return matches
