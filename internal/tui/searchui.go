@@ -4,8 +4,10 @@ import (
 	"fmt"
 	_ "fmt"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/Heribio/ValTracker/internal/jsonthings"
 	_ "github.com/Heribio/ValTracker/internal/jsonthings"
@@ -19,8 +21,6 @@ const (
 	name = iota
 	tag
 )
-
-
 
 type searchState struct {
     inputs []textinput.Model
@@ -127,15 +127,27 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) searchView() string {
     inputs := m.state.searchPage.inputs
     favorites := m.state.searchPage.favorites
-    var favoriteView string
+    favoriteView  := "Favorites: \n"
     for i := range favorites {
         favoriteView = favoriteView + fmt.Sprintf("%d: %s#%s\n", i, favorites[i].Name, favorites[i].Tag)
     }
-    return docStyle.Render(fmt.Sprintf(
+    help := shortHelpView([]key.Binding{
+        keys.PreviousInputBinding,
+        keys.NextInputBinding,
+        keys.ConfirmBinding,
+        keys.MatchListBinding,
+    })
+
+    inputView := fmt.Sprintf(
 		"Insert the name and tag of the valorant player\n\n%s\n\n%s",
 		inputs[name].View(),
 		inputs[tag].View(),
-	) + "\n\n" +favoriteView)
+	) + "\n\n"
+
+    return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top,
+        inputView,
+        favoriteView,
+        help))
 }
 
 func (m *model) nextInput() {

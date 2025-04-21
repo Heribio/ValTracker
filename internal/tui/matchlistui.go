@@ -109,6 +109,7 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             player := jsonthings.Username{Name: data.Name, Tag: data.Tag}
             params := jsonthings.WriteFavoriteParams{Player: player}
             jsonthings.WriteFavoriteData(params)
+            m.state.searchPage = InitialModel()
         case "ctrl+h":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[0]
@@ -161,7 +162,16 @@ var docStyle = lipgloss.NewStyle().
     Margin(3, 4)
 
 func (m model) matchListView() string {
-    return docStyle.Render(m.state.matchListPage.list.View())
+    help := shortHelpView([]key.Binding{
+        keys.NavigationBindings,
+        keys.SearchPageBinding,
+        keys.MatchPageBinding,
+        keys.PreviousModeBinding,
+        keys.NextModeBinding,
+        keys.QuickSwitchBinding,
+    })
+
+    return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top, m.state.matchListPage.list.View(), help))
 }
 
 //Display of informations in list items
@@ -219,6 +229,7 @@ func MatchList(name string, tag string, mode string) matchListState {
     l := list.New(items, matchlistDelegate{}, windowWidth, windowHeight)
     l.Title = fmt.Sprintf("%s: %s#%s", strings.ToUpper(mode[:1]) + mode[1:],  name, tag)
 
+    l.SetShowHelp(false)
     m := matchListState{list: l}
     return m
 }
