@@ -7,19 +7,6 @@ import (
 	"os"
 )
 
-type Username struct {
-	Name string
-	Tag  string
-}
-
-type WriteFavoriteParams struct {
-	Player Username
-}
-
-type FavoriteData struct {
-	Favorites []Username
-}
-
 func WriteFavoriteData(p WriteFavoriteParams) {
 	data := GetFavoriteData()
     data.Favorites = append(data.Favorites, p.Player)
@@ -27,7 +14,7 @@ func WriteFavoriteData(p WriteFavoriteParams) {
         data.Favorites= data.Favorites[1:]
     }
 
-    filePath := getFilePath("favorite.json")
+    filePath, err := getFilePath("favorite.json")
     if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
         os.WriteFile(filePath, []byte("{}"), 0666)
     }
@@ -44,7 +31,7 @@ func WriteFavoriteData(p WriteFavoriteParams) {
 }
 
 func GetFavoriteData() FavoriteData {
-    filePath := getFilePath("favorite.json")
+    filePath, err := getFilePath("favorite.json")
 	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
 		os.WriteFile(filePath, []byte("{}"), 0666)
 	}

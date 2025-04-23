@@ -11,6 +11,7 @@ import (
 
 	"github.com/Heribio/ValTracker/internal/jsonthings"
 	_ "github.com/Heribio/ValTracker/internal/jsonthings"
+	"github.com/Heribio/ValTracker/internal/valorantapi"
 )
 
 type (
@@ -64,7 +65,11 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
             if focusedEntry == len(inputs)-1 {
                 name := inputs[name].Value()
                 tag := inputs[tag].Value()
-                jsonthings.WriteFileData(name, tag)
+                username := valorantapi.Username{
+                    Name: name,
+                    Tag: tag,
+                }
+                jsonthings.WriteData("data.json", username)
 
                 m.state.matchListPage = MatchList(name, tag, m.mode)
                 return m.SwitchPage(matchListPage), nil
@@ -83,28 +88,45 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "ctrl+h":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[0]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            username := valorantapi.Username{
+                    Name: player.Name,
+                    Tag: player.Tag,
+                }
+            jsonthings.WriteData("data.json", username)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil
         case "ctrl+j":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[1]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            
+            username := valorantapi.Username{
+                    Name: player.Name,
+                    Tag: player.Tag,
+                }
+            jsonthings.WriteData("data.json", username)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil
         case "ctrl+k":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[2]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            username := valorantapi.Username{
+                    Name: player.Name,
+                    Tag: player.Tag,
+                }
+            jsonthings.WriteData("data.json", username)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil
         case "ctrl+l":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[3]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            username := valorantapi.Username{
+                    Name: player.Name,
+                    Tag: player.Tag,
+                }
+            jsonthings.WriteData("data.json", username)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil

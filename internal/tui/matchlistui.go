@@ -47,8 +47,10 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         case key.Matches(msg, keys.PreviousModeBinding):
             m.SwitchMode(false)
 
-            name := jsonthings.GetFileData("data.json").Name
-            tag := jsonthings.GetFileData("data.json").Tag
+            var player valorantapi.Username
+            jsonthings.ReadData("data.json", &player)
+            name := player.Name
+            tag := player.Tag
             puuid := valorantapi.GetAccountPUUID(name, tag)
             matchlist := valorantapi.GetAccountMatches(puuid, "1", "eu", m.mode)
 
@@ -65,8 +67,10 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         case key.Matches(msg, keys.NextModeBinding):
             m.SwitchMode(true)
 
-            name := jsonthings.GetFileData("data.json").Name
-            tag := jsonthings.GetFileData("data.json").Tag
+            var player valorantapi.Username
+            jsonthings.ReadData("data.json", &player)
+            name := player.Name
+            tag := player.Tag
             puuid := valorantapi.GetAccountPUUID(name, tag)
             matchlist := valorantapi.GetAccountMatches(puuid, "1", "eu", m.mode)
 
@@ -105,36 +109,38 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
         }
         switch msg.String() {
         case "ctrl+f":
-            data := jsonthings.GetFileData("data.json")
-            player := jsonthings.Username{Name: data.Name, Tag: data.Tag}
+            var username valorantapi.Username
+            jsonthings.ReadData("data.json", &username)
+
+            player := jsonthings.Username{Name: username.Name, Tag: username.Tag}
             params := jsonthings.WriteFavoriteParams{Player: player}
             jsonthings.WriteFavoriteData(params)
             m.state.searchPage = InitialModel()
         case "ctrl+h":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[0]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            jsonthings.WriteData("data.json", player)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil
         case "ctrl+j":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[1]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            jsonthings.WriteData("data.json", player)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil
         case "ctrl+k":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[2]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            jsonthings.WriteData("data.json", player)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil
         case "ctrl+l":
             favoriteData := jsonthings.GetFavoriteData()
             player := favoriteData.Favorites[3]
-            jsonthings.WriteFileData(player.Name, player.Tag)
+            jsonthings.WriteData("data.json", player)
 
             m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
             return m.SwitchPage(matchListPage), nil
@@ -157,7 +163,6 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-//Settings for margin of list
 var docStyle = lipgloss.NewStyle().
     Margin(3, 4)
 
@@ -174,7 +179,6 @@ func (m model) matchListView() string {
     return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top, m.state.matchListPage.list.View(), help))
 }
 
-//Display of informations in list items
 func (m Match) Title() string {
     matchTime, err := time.Parse(time.RFC3339Nano, m.StartedAt)
     matchDay, matchMonth, matchYear, matchHour, matchMinute := matchTime.Day(), matchTime.Month(), matchTime.Year(), matchTime.Hour(), matchTime.Minute()

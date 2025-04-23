@@ -9,49 +9,15 @@ import (
 	govapi "github.com/Heribio/go-valorant-api"
 )
 
-type Match struct { 
-    Id string
-    MapName string
-    Mode string
-    Kills int
-    Deaths int
-    Assists int
-    CharacterName string
-    StartedAt string 
-    Score   int 
-    Team      string
-    RedTeamScore  int 
-    BlueTeamScore int
-    Rank string
-    Headshots int
-    Bodyshots int
-    Legshots int
-}
-
-type Player struct {
-    PUUID    string
-    Username string
-    Tag     string
-    Kills int
-    Deaths int
-    Assists int
-    CharacterName string
-    Score   int 
-    Team      string
-    Rank    string
-    Rounds  int
-    Headshots int
-    Bodyshots int
-    Legshots int
-}
-
 var vapi = Authorization()
 
 func Authorization() *govapi.VAPI {
-    tokenData := jsonthings.GetTokenData()
-    apikey := tokenData.ValApiToken
+    var tokenData jsonthings.TokenData
 
+    jsonthings.ReadData("token.json", &tokenData)
+    apikey := tokenData.ValApiToken
 	vapi := govapi.New(govapi.WithKey(apikey))
+
 	return vapi
 }
 
@@ -70,7 +36,9 @@ func GetAccountPUUID(name string, tag string) string {
 }
 
 func AppendMatchList(list []Match, page string, affinity string, mode string) []Match {
-    puuid := GetAccountPUUID(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag)
+    var player Username
+    jsonthings.ReadData("data.json", &player)
+    puuid := GetAccountPUUID(player.Name, player.Tag)
     moreMatches := GetAccountMatches(puuid, page, affinity, mode) 
 
     list = append(list, moreMatches...)
@@ -116,7 +84,7 @@ func GetAccountMatches(puuid string, page string, affinity string, mode string) 
 	apiresp, err := vapi.GetLifetimeMatchesByPUUID(
         govapi.GetLifetimeMatchesByPUUIDParams{
             PUUID: puuid,
-            Affinity: affinity, //eu
+            Affinity: affinity,
             Page: page,
             Size: size,
             Mode: mode, 
@@ -146,9 +114,11 @@ func GetAccountMMR(puuid string, affinity string) *govapi.GetMMRByPUUIDv2Respons
     return mmrHistory
 }
 
+
 func CheckToken() bool {
-    token := jsonthings.GetTokenData().ValApiToken
-    vapi := govapi.New(govapi.WithKey(token))
+    var tokenData TokenData
+    jsonthings.ReadData("token.json", &tokenData)
+    vapi := govapi.New(govapi.WithKey(tokenData.ValApiToken))
     params := govapi.GetEsportsScheduleParams{}
 
     var resp *govapi.GetEsportsScheduleResponse
@@ -189,7 +159,9 @@ func FormatMatches(response *govapi.GetLifetimeMatchesByPUUIDResponse, mmrRespon
 }
 
 func getMMR() string {
-    puuid := GetAccountPUUID(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag)
+    var player Username
+    jsonthings.ReadData("data.json", &player)
+    puuid := GetAccountPUUID(player.Name, player.Tag)
     mmrList := GetAccountMMR(puuid, "eu") 
     return mmrList.Data.CurrentData.CurrenttierPatched
 }

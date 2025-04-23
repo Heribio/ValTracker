@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/Heribio/ValTracker/internal/jsonthings"
+	"github.com/Heribio/ValTracker/internal/valorantapi"
 )
 
 func Run() {
@@ -48,6 +49,9 @@ type model struct {
 
 
 func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
+    var username valorantapi.Username
+    jsonthings.ReadData("data.json", &username)
+
     result := model{
         page: matchListPage,
         renderer: renderer,
@@ -59,7 +63,7 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
         },
         state: state{
             searchPage: InitialModel(),
-            matchListPage: MatchList(jsonthings.GetFileData("data.json").Name, jsonthings.GetFileData("data.json").Tag, "competitive"),
+            matchListPage: MatchList(username.Name, username.Tag, "competitive"),
             selectedMatchPage: SelectedMatchList(""),
         },
         mode: "competitive",

@@ -59,7 +59,6 @@ func shortHelpView(bindings []key.Binding) string {
         }
     }
 
-    // Join them with spaces (horizontally aligned)
     b.WriteString(strings.Join(parts, "  "))
 
     return b.String()
