@@ -2,7 +2,7 @@ package tui
 
 import (
 	"fmt"
-	_ "fmt"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -10,7 +10,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/Heribio/ValTracker/internal/jsonthings"
-	_ "github.com/Heribio/ValTracker/internal/jsonthings"
 	"github.com/Heribio/ValTracker/internal/valorantapi"
 )
 
@@ -18,172 +17,138 @@ type (
 	errMsg error
 )
 
-const (
-	name = iota
-	tag
-)
-
 type searchState struct {
-    inputs []textinput.Model
-    favorites []jsonthings.Username
-    focused   int
-    err       error
+	input     textinput.Model
+	favorites []jsonthings.Username
+	err       error
 }
 
 func InitialModel() searchState {
-    favorites := jsonthings.GetFavoriteData().Favorites
-    inputs := make([]textinput.Model, 2)
+	favorites := jsonthings.GetFavoriteData().Favorites
 
-	inputs[name] = textinput.New()
-	inputs[name].Placeholder = "Name"
-	inputs[name].Focus()
-	inputs[name].CharLimit = 156
-	inputs[name].Width = 20
-
-	inputs[tag] = textinput.New()
-	inputs[tag].Placeholder = "Tag"
-	inputs[tag].CharLimit = 6
-	inputs[tag].Width = 20
+	input := textinput.New()
+	input.Placeholder = "Name#Tag  (e.g. PlayerName#1234)"
+	input.Focus()
+	input.CharLimit = 163
+	input.Width = 36
 
 	return searchState{
-		inputs: inputs,
-        favorites: favorites,
-		focused: 0,
+		input:     input,
+		favorites: favorites,
 		err:       nil,
 	}
 }
 
-func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
-    inputs := m.state.searchPage.inputs
-    focusedEntry := m.state.searchPage.focused
-    var cmds []tea.Cmd = make([]tea.Cmd, len(inputs))
-
-    switch msg := msg.(type) {
-    case tea.KeyMsg:
-        switch msg.String() {
-        case "enter":
-            if focusedEntry == len(inputs)-1 {
-                name := inputs[name].Value()
-                tag := inputs[tag].Value()
-                username := valorantapi.Username{
-                    Name: name,
-                    Tag: tag,
-                }
-                jsonthings.WriteData("data.json", username)
-
-                m.state.matchListPage = MatchList(name, tag, m.mode)
-                return m.SwitchPage(matchListPage), nil
-            }
-            m.nextInput()
-            return m, nil
-        case "ctrl+c":
-            return m, tea.Quit
-        case "tab", "down":
-            m.nextInput()
-        case "shift+tab", "up":
-            m.prevInput()
-        case "esc":
-            m = m.SwitchPage(matchListPage)
-            return m, nil
-        case "ctrl+h":
-            favoriteData := jsonthings.GetFavoriteData()
-            player := favoriteData.Favorites[0]
-            username := valorantapi.Username{
-                    Name: player.Name,
-                    Tag: player.Tag,
-                }
-            jsonthings.WriteData("data.json", username)
-
-            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-            return m.SwitchPage(matchListPage), nil
-        case "ctrl+j":
-            favoriteData := jsonthings.GetFavoriteData()
-            player := favoriteData.Favorites[1]
-            
-            username := valorantapi.Username{
-                    Name: player.Name,
-                    Tag: player.Tag,
-                }
-            jsonthings.WriteData("data.json", username)
-
-            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-            return m.SwitchPage(matchListPage), nil
-        case "ctrl+k":
-            favoriteData := jsonthings.GetFavoriteData()
-            player := favoriteData.Favorites[2]
-            username := valorantapi.Username{
-                    Name: player.Name,
-                    Tag: player.Tag,
-                }
-            jsonthings.WriteData("data.json", username)
-
-            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-            return m.SwitchPage(matchListPage), nil
-        case "ctrl+l":
-            favoriteData := jsonthings.GetFavoriteData()
-            player := favoriteData.Favorites[3]
-            username := valorantapi.Username{
-                    Name: player.Name,
-                    Tag: player.Tag,
-                }
-            jsonthings.WriteData("data.json", username)
-
-            m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-            return m.SwitchPage(matchListPage), nil
-
-        }
-
-
-        for i := range inputs {
-            inputs[i].Blur()
-        }
-        inputs[m.state.searchPage.focused].Focus()
-    }
-
-    for i := range inputs {
-        inputs[i], cmds[i] = inputs[i].Update(msg)
-    }
-    return m, tea.Batch(cmds...)
+// loadFavorite switches to the match list for the nth favorite (0-indexed).
+// Returns false if the favorite index is out of range.
+func (m *model) loadFavorite(index int) bool {
+	favoriteData := jsonthings.GetFavoriteData()
+	if index < 0 || index >= len(favoriteData.Favorites) {
+		return false
+	}
+	player := favoriteData.Favorites[index]
+	username := valorantapi.Username{Name: player.Name, Tag: player.Tag}
+	jsonthings.WriteData("data.json", username)
+	m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
+	m.resizeMatchList()
+	return true
 }
+
+func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			raw := m.state.searchPage.input.Value()
+			parts := strings.SplitN(raw, "#", 2)
+			if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+				m.state.searchPage.err = fmt.Errorf("enter player as Name#Tag")
+				return m, nil
+			}
+			playerName, playerTag := parts[0], parts[1]
+			username := valorantapi.Username{Name: playerName, Tag: playerTag}
+			jsonthings.WriteData("data.json", username)
+			m.state.matchListPage = MatchList(playerName, playerTag, m.mode)
+			m.resizeMatchList()
+			return m.SwitchPage(matchListPage), nil
+		case "ctrl+c":
+			return m, tea.Quit
+		case "esc":
+			return m.SwitchPage(matchListPage), nil
+		case "alt+1":
+			if m.loadFavorite(0) {
+				return m.SwitchPage(matchListPage), nil
+			}
+		case "alt+2":
+			if m.loadFavorite(1) {
+				return m.SwitchPage(matchListPage), nil
+			}
+		case "alt+3":
+			if m.loadFavorite(2) {
+				return m.SwitchPage(matchListPage), nil
+			}
+		case "alt+4":
+			if m.loadFavorite(3) {
+				return m.SwitchPage(matchListPage), nil
+			}
+		}
+	}
+
+	m.state.searchPage.input, cmd = m.state.searchPage.input.Update(msg)
+	return m, cmd
+}
+
+var searchShortcutKeys = []string{"alt+1", "alt+2", "alt+3", "alt+4"}
 
 func (m model) searchView() string {
-    inputs := m.state.searchPage.inputs
-    favorites := m.state.searchPage.favorites
-    favoriteView  := "Favorites: \n"
-    for i := range favorites {
-        favoriteView = favoriteView + fmt.Sprintf("%d: %s#%s\n", i, favorites[i].Name, favorites[i].Tag)
-    }
-    help := shortHelpView([]key.Binding{
-        keys.PreviousInputBinding,
-        keys.NextInputBinding,
-        keys.ConfirmBinding,
-        keys.MatchListBinding,
-    })
+	favorites := m.state.searchPage.favorites
+	input := m.state.searchPage.input
 
-    inputView := fmt.Sprintf(
-		"Insert the name and tag of the valorant player\n\n%s\n\n%s",
-		inputs[name].View(),
-		inputs[tag].View(),
-	) + "\n\n"
+	// Build the input box
+	inputBox := searchInputStyle.Render(
+		lipgloss.JoinVertical(lipgloss.Left,
+			"Search for a Valorant player",
+			"",
+			input.View(),
+		),
+	)
 
-    return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top,
-        inputView,
-        favoriteView,
-        help))
-}
-
-func (m *model) nextInput() {
-    focusedEntry := m.state.searchPage.focused
-    inputs := m.state.searchPage.inputs
-
-	m.state.searchPage.focused = (focusedEntry + 1) % len(inputs)
-}
-
-func (m *model) prevInput() {
-    inputs := m.state.searchPage.inputs
-
-	m.state.searchPage.focused--
-	if m.state.searchPage.focused < 0 {
-		m.state.searchPage.focused = len(inputs) - 1
+	// Build error line (empty if no error)
+	errLine := ""
+	if m.state.searchPage.err != nil {
+		errLine = lipgloss.NewStyle().Foreground(lipgloss.Color("#e4485d")).Render(
+			"  ✗ "+m.state.searchPage.err.Error(),
+		) + "\n"
 	}
+
+	// Build favorites list
+	favoriteView := "Favorites:\n"
+	if len(favorites) == 0 {
+		favoriteView += "  (none saved)\n"
+	} else {
+		for i, fav := range favorites {
+			if i >= len(searchShortcutKeys) {
+				break
+			}
+			shortcut := helpKeyStyle("[" + searchShortcutKeys[i] + "]")
+			entry := helpDescStyle(fmt.Sprintf("  %s#%s", fav.Name, fav.Tag))
+			favoriteView += shortcut + entry + "\n"
+		}
+	}
+
+	help := shortHelpView([]key.Binding{
+		keys.ConfirmBinding,
+		keys.MatchListBinding,
+		keys.QuickSwitchBinding,
+	})
+
+	return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top,
+		inputBox,
+		errLine,
+		favoriteView,
+		"",
+		help,
+	))
 }

@@ -34,6 +34,11 @@ var(
 
 var re = lipgloss.NewRenderer(os.Stdout)
 
+var searchInputStyle = lipgloss.NewStyle().
+	Border(lipgloss.RoundedBorder()).
+	BorderForeground(lipgloss.Color("#2F6D90")).
+	Padding(1, 2)
+
 type matchlistDelegate struct{}
 type selectedmatchDelegate struct{
     match *govapi.GetMatchResponse

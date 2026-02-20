@@ -1,6 +1,8 @@
 module github.com/Heribio/ValTracker
 
-go 1.23.4
+go 1.24
+
+toolchain go1.24.5
 
 require (
 	github.com/Heribio/go-valorant-api v0.0.0-20250323155429-8b18bdea6476
@@ -15,6 +17,8 @@ require (
 	github.com/charmbracelet/x/ansi v0.4.5 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
+	github.com/github/copilot-sdk/go v0.1.25 // indirect
+	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect

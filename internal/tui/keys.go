@@ -42,8 +42,8 @@ var keys = keyMap{
         key.WithHelp("f", "Favorite a player"),
         ),
     QuickSwitchBinding: key.NewBinding(
-        key.WithKeys("ctrl+h/j/k/l"),
-        key.WithHelp("ctrl+h/j/k/l", "Switch between favorite profiles"),
+        key.WithKeys("alt+1", "alt+2", "alt+3", "alt+4"),
+        key.WithHelp("alt+1/2/3/4", "Switch between favorite profiles"),
         ),
     NextInputBinding: key.NewBinding(
         key.WithKeys("tab"),

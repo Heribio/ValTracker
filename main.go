@@ -9,14 +9,14 @@ import (
 )
 
 func main() {
-    if valorantapi.CheckToken() {
-        tui.Run()
-    } else {
-        jsonthings.PromptToken()
-        if valorantapi.CheckToken() {
-            fmt.Println("API key working")
-        } else {
-            fmt.Println("API key not working")
-        }
-    }
+	if valorantapi.CheckToken() {
+		tui.Run()
+	} else {
+		jsonthings.PromptToken()
+		if valorantapi.CheckToken() {
+			fmt.Println("API key working")
+		} else {
+			fmt.Println("API key not working")
+		}
+	}
 }

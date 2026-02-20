@@ -23,5 +23,5 @@ func (m model) overViewUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) overViewView() string {
-    return "Overview Page"
+	return "Overview Page"
 }
