@@ -38,8 +38,8 @@ var keys = keyMap{
         key.WithHelp("←", "Previous mode"),
         ),
     FavoriteBinding: key.NewBinding(
-        key.WithKeys("f"),
-        key.WithHelp("f", "Favorite a player"),
+        key.WithKeys("ctrl+f"),
+        key.WithHelp("ctrl+f", "Favorite a player"),
         ),
     QuickSwitchBinding: key.NewBinding(
         key.WithKeys("alt+1", "alt+2", "alt+3", "alt+4"),

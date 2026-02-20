@@ -48,6 +48,7 @@ func (m model) selectMatchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if selectedItem, ok := m.state.selectedMatchPage.list.SelectedItem().(Player); ok {
 				m.state.matchListPage = MatchList(selectedItem.Username, selectedItem.Tag, "competitive")
+				m.resizeMatchList()
 				m = m.SwitchPage(matchListPage)
 			}
 			return m, nil
@@ -86,6 +87,24 @@ func (m model) selectedMatchView() string {
 	})
 
 	return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top, m.state.selectedMatchPage.list.View(), help))
+}
+
+func (m *model) resizeSelectedMatch() {
+	if m.state.width == 0 && m.state.height == 0 {
+		return
+	}
+	vMargin := 3 * 2
+	hMargin := 4 * 2
+	helpView := shortHelpView([]key.Binding{
+		keys.NavigationBindings,
+		keys.SearchPageBinding,
+		keys.MatchPageBinding,
+		keys.PreviousModeBinding,
+		keys.NextModeBinding,
+		keys.QuickSwitchBinding,
+	})
+	helpHeight := lipgloss.Height(helpView)
+	m.state.selectedMatchPage.list.SetSize(m.state.width-hMargin, m.state.height-vMargin-helpHeight)
 }
 
 type Player valorantapi.Player

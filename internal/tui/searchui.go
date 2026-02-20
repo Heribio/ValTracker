@@ -72,26 +72,32 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			jsonthings.WriteData("data.json", username)
 			m.state.matchListPage = MatchList(playerName, playerTag, m.mode)
 			m.resizeMatchList()
-			return m.SwitchPage(matchListPage), nil
+			m.searchOpen = false
+			return m, nil
 		case "ctrl+c":
 			return m, tea.Quit
 		case "esc":
-			return m.SwitchPage(matchListPage), nil
+			m.searchOpen = false
+			return m, nil
 		case "alt+1":
 			if m.loadFavorite(0) {
-				return m.SwitchPage(matchListPage), nil
+				m.searchOpen = false
+				return m, nil
 			}
 		case "alt+2":
 			if m.loadFavorite(1) {
-				return m.SwitchPage(matchListPage), nil
+				m.searchOpen = false
+				return m, nil
 			}
 		case "alt+3":
 			if m.loadFavorite(2) {
-				return m.SwitchPage(matchListPage), nil
+				m.searchOpen = false
+				return m, nil
 			}
 		case "alt+4":
 			if m.loadFavorite(3) {
-				return m.SwitchPage(matchListPage), nil
+				m.searchOpen = false
+				return m, nil
 			}
 		}
 	}
@@ -102,31 +108,22 @@ func (m model) searchUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 var searchShortcutKeys = []string{"alt+1", "alt+2", "alt+3", "alt+4"}
 
-func (m model) searchView() string {
+func (m model) searchPopupView() string {
 	favorites := m.state.searchPage.favorites
 	input := m.state.searchPage.input
 
-	// Build the input box
-	inputBox := searchInputStyle.Render(
-		lipgloss.JoinVertical(lipgloss.Left,
-			"Search for a Valorant player",
-			"",
-			input.View(),
-		),
-	)
-
-	// Build error line (empty if no error)
+	// Error line
 	errLine := ""
 	if m.state.searchPage.err != nil {
 		errLine = lipgloss.NewStyle().Foreground(lipgloss.Color("#e4485d")).Render(
-			"  ✗ "+m.state.searchPage.err.Error(),
-		) + "\n"
+			"✗ " + m.state.searchPage.err.Error(),
+		)
 	}
 
-	// Build favorites list
+	// Favorites list
 	favoriteView := "Favorites:\n"
 	if len(favorites) == 0 {
-		favoriteView += "  (none saved)\n"
+		favoriteView += "  (none saved)"
 	} else {
 		for i, fav := range favorites {
 			if i >= len(searchShortcutKeys) {
@@ -141,14 +138,18 @@ func (m model) searchView() string {
 	help := shortHelpView([]key.Binding{
 		keys.ConfirmBinding,
 		keys.MatchListBinding,
-		keys.QuickSwitchBinding,
 	})
 
-	return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top,
-		inputBox,
+	inner := lipgloss.JoinVertical(lipgloss.Left,
+		"Search for a Valorant player",
+		"",
+		input.View(),
 		errLine,
+		"",
 		favoriteView,
 		"",
 		help,
-	))
+	)
+
+	return popupStyle.Render(inner)
 }

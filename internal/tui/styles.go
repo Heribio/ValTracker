@@ -34,10 +34,12 @@ var(
 
 var re = lipgloss.NewRenderer(os.Stdout)
 
-var searchInputStyle = lipgloss.NewStyle().
+var popupStyle = lipgloss.NewStyle().
 	Border(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("#2F6D90")).
-	Padding(1, 2)
+	Background(lipgloss.Color("#1a1a2e")).
+	Padding(1, 3).
+	Width(50)
 
 type matchlistDelegate struct{}
 type selectedmatchDelegate struct{

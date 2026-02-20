@@ -111,10 +111,6 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.resizeMatchList()
 			return m, nil
 
-		case key.Matches(msg, keys.SearchPageBinding):
-			m = m.SwitchPage(searchPage)
-
-			return m, nil
 		case key.Matches(msg, keys.MatchPageBinding):
 			var existingMatches []valorantapi.Match
 			for _, item := range m.state.matchListPage.list.Items() {
@@ -144,33 +140,17 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			jsonthings.WriteFavoriteData(params)
 			m.state.searchPage = InitialModel()
 		case "alt+1":
-			favoriteData := jsonthings.GetFavoriteData()
-			player := favoriteData.Favorites[0]
-			jsonthings.WriteData("data.json", player)
-
-			m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-			return m.SwitchPage(matchListPage), nil
+			m.loadFavorite(0)
+			return m, nil
 		case "alt+2":
-			favoriteData := jsonthings.GetFavoriteData()
-			player := favoriteData.Favorites[1]
-			jsonthings.WriteData("data.json", player)
-
-			m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-			return m.SwitchPage(matchListPage), nil
+			m.loadFavorite(1)
+			return m, nil
 		case "alt+3":
-			favoriteData := jsonthings.GetFavoriteData()
-			player := favoriteData.Favorites[2]
-			jsonthings.WriteData("data.json", player)
-
-			m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-			return m.SwitchPage(matchListPage), nil
+			m.loadFavorite(2)
+			return m, nil
 		case "alt+4":
-			favoriteData := jsonthings.GetFavoriteData()
-			player := favoriteData.Favorites[3]
-			jsonthings.WriteData("data.json", player)
-
-			m.state.matchListPage = MatchList(player.Name, player.Tag, m.mode)
-			return m.SwitchPage(matchListPage), nil
+			m.loadFavorite(3)
+			return m, nil
 
 		case "ctrl+c", "esc":
 			return m, tea.Quit
@@ -178,6 +158,7 @@ func (m model) matchListUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if selectedItem, ok := m.state.matchListPage.list.SelectedItem().(Match); ok {
 				m.selectedMatch = &selectedItem
 				m.state.selectedMatchPage = SelectedMatchList(m.selectedMatch.Id)
+				m.resizeSelectedMatch()
 				m = m.SwitchPage(selectedMatchPage)
 			}
 			return m, nil
@@ -202,7 +183,21 @@ func (m model) matchListView() string {
 		keys.QuickSwitchBinding,
 	})
 
-	return docStyle.Render(lipgloss.JoinVertical(lipgloss.Top, m.state.matchListPage.list.View(), help))
+	base := docStyle.Render(lipgloss.JoinVertical(lipgloss.Top, m.state.matchListPage.list.View(), help))
+
+	if m.searchOpen {
+		return lipgloss.Place(
+			m.state.width,
+			m.state.height,
+			lipgloss.Center,
+			lipgloss.Center,
+			m.searchPopupView(),
+			lipgloss.WithWhitespaceChars(""),
+			lipgloss.WithWhitespaceForeground(lipgloss.AdaptiveColor{Light: "0", Dark: "0"}),
+		)
+	}
+
+	return base
 }
 
 func (m Match) Title() string {
@@ -260,7 +255,7 @@ func (m *model) resizeMatchList() {
 		keys.MatchPageBinding,
 		keys.PreviousModeBinding,
 		keys.NextModeBinding,
-		keys.QuickSwitchBinding,
+		keys.FavoriteBinding,
 	})
 	helpHeight := lipgloss.Height(helpView)
 	m.state.matchListPage.list.SetSize(m.state.width-hMargin, m.state.height-vMargin-helpHeight)

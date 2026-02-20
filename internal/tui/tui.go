@@ -49,6 +49,7 @@ type model struct {
 	tag           string
 	selectedMatch *Match
 	mode          string
+	searchOpen    bool
 }
 
 func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
@@ -60,7 +61,6 @@ func NewModel(renderer *lipgloss.Renderer) (tea.Model, error) {
 		renderer: renderer,
 		accountPages: []page{
 			overviewPage,
-			searchPage,
 			matchListPage,
 			selectedMatchPage,
 		},
@@ -88,10 +88,32 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.state.width = msg.Width
 		m.state.height = msg.Height
+		m.resizeMatchList()
+		m.resizeSelectedMatch()
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		}
+	}
+
+	// When the search popup is open, route all input there first.
+	if m.searchOpen {
+		var updatedModel tea.Model
+		var cmd tea.Cmd
+		updatedModel, cmd = m.searchUpdate(msg)
+		if newModel, ok := updatedModel.(model); ok {
+			m = newModel
+		}
+		return m, cmd
+	}
+
+	// Open the search popup with 's' from the match list page.
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		if keyMsg.String() == "s" && m.page == matchListPage {
+			m.searchOpen = true
+			m.state.searchPage = InitialModel()
+			return m, nil
 		}
 	}
 
@@ -100,12 +122,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case overviewPage:
 		var updatedModel tea.Model
 		updatedModel, cmd = m.overViewUpdate(msg)
-		if newModel, ok := updatedModel.(model); ok {
-			m = newModel
-		}
-	case searchPage:
-		var updatedModel tea.Model
-		updatedModel, cmd = m.searchUpdate(msg)
 		if newModel, ok := updatedModel.(model); ok {
 			m = newModel
 		}
@@ -134,8 +150,6 @@ func (m model) View() string {
 	switch m.page {
 	case overviewPage:
 		return m.overViewView()
-	case searchPage:
-		return m.searchView()
 	case matchListPage:
 		return m.matchListView()
 	case selectedMatchPage:
